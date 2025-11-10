@@ -1,0 +1,60 @@
+/* ---------------------------- */
+/*   Grundlæggende sideopsætning */
+/* ---------------------------- */
+
+body {
+    font-family: Arial, sans-serif;          /* Enkel og læsbar skrifttype */
+    background: #f4f6f8;                     /* Lys grå baggrund for et rent udtryk */
+    display: flex;                           /* Brug flexbox til centrering */
+    justify-content: center;                 /* Centrerer indholdet vandret */
+    align-items: center;                     /* Centrerer indholdet lodret */
+    height: 100vh;                           /* Får containeren til at fylde hele skærmhøjden */
+    margin: 0;                               /* Fjerner standard margin */
+}
+
+/* ---------------------------- */
+/*       Indholdsboksen          */
+/* ---------------------------- */
+
+.container {
+    text-align: center;                      /* Centrerer alt tekst */
+    background: white;                       /* Hvid baggrund for kontrast mod den grå */
+    padding: 40px 60px;                      /* Giver luft omkring indholdet */
+    border-radius: 15px;                     /* Bløde hjørner for et moderne look */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Diskret skygge for dybdeeffekt */
+}
+
+/* ---------------------------- */
+/*       Overskrift og tekst     */
+/* ---------------------------- */
+
+h1 {
+    color: #1a73e8;                          /* Blå nuance som gennemgående farve */
+    margin-bottom: 10px;                     /* Lidt luft under overskriften */
+}
+
+p {
+    color: #555;                             /* Neutral mørkegrå farve til brødtekst */
+    margin-bottom: 25px;                     /* Giver afstand til knapperne */
+}
+
+/* ---------------------------- */
+/*         Knap-styling          */
+/* ---------------------------- */
+
+button {
+    background-color: #1a73e8;               /* Primær blå farve */
+    color: white;                            /* Hvid tekst for kontrast */
+    border: none;                            /* Fjern standard kant */
+    padding: 12px 24px;                      /* Gør knappen stor nok til klik */
+    border-radius: 8px;                      /* Bløde kanter */
+    margin: 5px;                             /* Lidt afstand mellem knapper */
+    font-size: 16px;                         /* Standard læsbar tekststørrelse */
+    cursor: pointer;                         /* Skift til håndmarkør ved hover */
+    transition: background 0.3s ease;        /* Glidende farveskift ved hover */
+}
+
+/* Ændrer farven ved hover for visuel feedback */
+button:hover {
+    background-color: #155bb5;               /* Mørkere blå ved hover */
+}

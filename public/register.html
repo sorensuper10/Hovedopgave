@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrér - Synsdata</title>
+
+    <!-- Tilknytter den fælles CSS-fil for layout og design -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Hovedcontainer for registreringssiden -->
+<div class="container">
+    <!-- Overskrift -->
+    <h1>Opret bruger</h1>
+
+    <!-- Formular der sender data til serverens register-route -->
+    <form id="registerForm" action="/api/users/register" method="POST">
+        <!-- Felt til indtastning af brugernavn -->
+        <input type="text" name="username" placeholder="Brugernavn" required>
+        <!-- Felt til indtastning af adgangskode -->
+        <input type="password" name="password" placeholder="Adgangskode" required>
+        <!-- Knap til at sende registreringsformularen -->
+        <button type="submit">Registrér</button>
+    </form>
+
+    <!-- Link til login-side, hvis brugeren allerede har en konto -->
+    <p>Allerede bruger? <a href="login.html">Login her</a></p>
+
+    <!-- Knap der sender brugeren tilbage til forsiden -->
+    <button onclick="window.location.href='index.html'">Tilbage</button>
+</div>
+
+</body>
+</html>

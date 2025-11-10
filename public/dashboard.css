@@ -1,0 +1,39 @@
+/* ------------------------- */
+/*   Grundlæggende layout    */
+/* ------------------------- */
+
+body {
+    /* Skrifttype og layout */
+    font-family: Arial, sans-serif;   /* Simpel og læsbar font */
+    text-align: center;               /* Centrerer alt tekst og indhold */
+    margin-top: 80px;                 /* Skubber indholdet ned fra toppen */
+    background-color: #fff;           /* Hvid baggrund */
+}
+
+/* ------------------------- */
+/*        Overskrift          */
+/* ------------------------- */
+
+h1 {
+    color: #333;                      /* Mørkegrå farve for god kontrast */
+}
+
+/* ------------------------- */
+/*        Knap-styling        */
+/* ------------------------- */
+
+button {
+    margin-top: 20px;                 /* Lidt luft over knappen */
+    padding: 10px 20px;               /* Gør knappen større og lettere at trykke på */
+    font-size: 16px;                  /* Standard læsbar tekststørrelse */
+    background-color: #0078d7;        /* Blå baggrund (Microsoft-blå nuance) */
+    color: white;                     /* Hvid tekst for kontrast */
+    border: none;                     /* Fjern standardkant */
+    border-radius: 5px;               /* Bløde hjørner */
+    cursor: pointer;                  /* Skift markør til hånd ved hover */
+}
+
+/* Effekt når man holder musen over knappen */
+button:hover {
+    background-color: #005ea1;        /* Gør knappen mørkere ved hover */
+}

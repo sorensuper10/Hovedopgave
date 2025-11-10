@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Synsdata</title>
+
+    <!-- Tilknytter den fælles CSS-fil for layout og design -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Hovedcontainer for login-siden -->
+<div class="container">
+    <!-- Overskrift -->
+    <h1>Login</h1>
+
+    <!-- Formular der sender login-data til serverens login-route -->
+    <form id="loginForm" action="/api/users/login" method="POST">
+        <!-- Brugernavn-felt -->
+        <input type="text" id="username" name="username" placeholder="Brugernavn" required>
+        <!-- Adgangskode-felt -->
+        <input type="password" name="password" placeholder="Adgangskode" required>
+        <!-- Knap til at sende login-formularen -->
+        <button type="submit">Login</button>
+    </form>
+
+    <!-- Link til registreringsside, hvis man ikke har en konto -->
+    <p>Har du ikke en konto? <a href="register.html">Registrér her</a></p>
+
+    <!-- Knap der sender brugeren tilbage til forsiden -->
+    <button onclick="window.location.href='index.html'">Tilbage</button>
+</div>
+
+</body>
+</html>

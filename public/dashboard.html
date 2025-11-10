@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard – Synsdata</title>
+
+    <!-- Tilknytter den eksterne CSS-fil med layout og styling -->
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+<!-- MAIN indeholder dashboardets hovedindhold -->
+<main>
+    <!-- Her bliver brugerens navn dynamisk indsat via dashboard.js -->
+    <h1 id="welcome">Velkommen</h1>
+
+    <!-- Logout-knap, der sender en POST-request til serveren -->
+    <form action="/api/users/logout" method="POST">
+        <button type="submit">Log ud</button>
+    </form>
+</main>
+
+<!-- Tilknytter den eksterne JavaScript-fil, der henter sessionsdata -->
+<script src="dashboard.js"></script>
+
+</body>
+</html>
