@@ -10,6 +10,9 @@ const userRoute = require("./routes/userRoutes"); // Import af userRoutes filen
 // Initialiser Express-applikationen
 const app = express();
 
+// ⚠️ VIGTIGT på Render (proxy + https)
+app.set("trust proxy", 1);
+
 // Hent databaseforbindelse og port fra miljøvariabler (.env)
 const dbConnectionString = process.env.DB_CONNECTION_STRING; // Indeholder MongoDB URI
 const port = process.env.PORT || 3000; // Standardport = 3000, hvis ingen port er defineret i .env
