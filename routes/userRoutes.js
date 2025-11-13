@@ -38,5 +38,7 @@ router.post('/login', userController.login);
  */
 router.post('/logout', userController.logout);
 
+router.post('/app-login', userController.appLogin);
+
 // Eksportér routeren så den kan bruges i server.js
 module.exports = router;

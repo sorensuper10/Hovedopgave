@@ -69,3 +69,28 @@ exports.logout = (req, res) => {
         return res.redirect("/index.html");
     });
 };
+
+exports.appLogin = async (req, res) => {
+    try {
+        const { username, password } = req.body || {};
+        if (!username || !password)
+            return res.status(400).json({ success: false, message: "Missing fields" });
+
+        const user = await User.findOne({ username: username.trim() });
+        if (!user)
+            return res.status(401).json({ success: false, message: "Wrong username or password" });
+
+        const ok = await bcrypt.compare(password, user.passwordHash);
+        if (!ok)
+            return res.status(401).json({ success: false, message: "Wrong username or password" });
+
+        return res.json({
+            success: true,
+            username: user.username
+        });
+
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ success: false, message: "Server error" });
+    }
+};
