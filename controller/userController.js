@@ -94,3 +94,47 @@ exports.appLogin = async (req, res) => {
         return res.status(500).json({ success: false, message: "Server error" });
     }
 };
+
+// Register til appen (JSON-baseret)
+exports.appRegister = async (req, res) => {
+    try {
+        let { username, password } = req.body || {};
+        if (!username || !password) {
+            return res.status(400).json({
+                success: false,
+                message: "Manglende felter"
+            });
+        }
+
+        username = username.trim();
+
+        // Tjek om brugernavn allerede findes
+        const exists = await User.findOne({ username });
+        if (exists) {
+            return res.status(409).json({
+                success: false,
+                message: "Brugernavn er allerede i brug"
+            });
+        }
+
+        // Hash adgangskode
+        const passwordHash = await bcrypt.hash(password, 10);
+
+        // Opret bruger
+        await User.create({ username, passwordHash });
+
+        // Returnér JSON til appen i stedet for redirect
+        return res.status(201).json({
+            success: true,
+            username: username,
+            message: "Bruger oprettet"
+        });
+
+    } catch (err) {
+        console.error("Fejl under appRegister:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Serverfejl, prøv igen senere"
+        });
+    }
+};
