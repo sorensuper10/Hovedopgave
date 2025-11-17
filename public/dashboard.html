@@ -5,24 +5,125 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard – Synsdata</title>
 
-    <!-- Tilknytter den eksterne CSS-fil med layout og styling -->
     <link rel="stylesheet" href="dashboard.css">
+
+    <style>
+        /* Ekstra styling for pænt layout */
+        #ai-scan {
+            text-align: center;
+            margin-top: 40px;
+        }
+
+        #previewContainer {
+            display: none;
+            margin-top: 15px;
+        }
+
+        #previewBox {
+            border: 1px solid #ccc;
+            padding: 10px;
+            display: inline-block;
+            background: #f7f7f7;
+        }
+
+        #previewImage {
+            max-width: 300px;
+            border: 1px solid #aaa;
+        }
+
+        #scanBtn {
+            display: block;
+            margin: 15px auto 0 auto; /* centrer + afstand */
+        }
+
+    </style>
 </head>
+
 <body>
 
-<!-- MAIN indeholder dashboardets hovedindhold -->
 <main>
-    <!-- Her bliver brugerens navn dynamisk indsat via dashboard.js -->
     <h1 id="welcome">Velkommen</h1>
 
-    <!-- Logout-knap, der sender en POST-request til serveren -->
-    <form action="/api/users/logout" method="POST">
-        <button type="submit">Log ud</button>
-    </form>
+    <!-- 🟦 AI Scan sektion -->
+    <section id="ai-scan">
+        <h2>Scan nummerplade / km-tal</h2>
+
+        <!-- Filvalg -->
+        <input type="file" id="imageInput" accept="image/*">
+
+        <!-- Forhåndsvisning -->
+        <div id="previewContainer">
+            <div id="previewBox">
+                <img id="previewImage" src="#" alt="Forhåndsvisning">
+            </div>
+        </div>
+
+        <!-- Scan knap -->
+        <button id="scanBtn">Scan billede</button>
+
+        <!-- Loading -->
+        <p id="loading" style="display:none;">⏳ Scanner billedet…</p>
+
+        <!-- Resultat -->
+        <div id="result" style="display:none; margin-top:20px; padding:10px; border:1px solid #ccc; background:#f7f7f7;">
+            <h3>Resultat:</h3>
+            <p><strong>Nummerplade:</strong> <span id="plateResult"></span></p>
+            <p><strong>KM-tal:</strong> <span id="kmResult"></span></p>
+            <p><strong>Raw OCR:</strong> <span id="rawResult"></span></p>
+        </div>
+    </section>
 </main>
 
-<!-- Tilknytter den eksterne JavaScript-fil, der henter sessionsdata -->
+<form action="/api/users/logout" method="POST">
+    <button type="submit">Log ud</button>
+</form>
+
 <script src="dashboard.js"></script>
+
+<!-- AI SCAN SCRIPT -->
+<script>
+    // 🖼 VIS FORHÅNDSVISNING AF BILLEDE
+    document.getElementById("imageInput").addEventListener("change", function () {
+        const file = this.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            document.getElementById("previewImage").src = e.target.result;
+            document.getElementById("previewContainer").style.display = "block";
+        };
+        reader.readAsDataURL(file);
+    });
+
+    // 📤 SEND BILLEDET TIL BACKEND
+    document.getElementById("scanBtn").addEventListener("click", async () => {
+        const fileInput = document.getElementById("imageInput");
+        if (!fileInput.files.length) {
+            alert("Vælg et billede først!");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("image", fileInput.files[0]);
+
+        document.getElementById("loading").style.display = "block";
+        document.getElementById("result").style.display = "none";
+
+        const response = await fetch("/scan", {
+            method: "POST",
+            body: formData
+        });
+
+        const data = await response.json();
+
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("result").style.display = "block";
+
+        document.getElementById("plateResult").textContent   = data.detected_plate || "Ingen fundet";
+        document.getElementById("kmResult").textContent      = data.detected_km || "Ingen fundet";
+        document.getElementById("rawResult").textContent     = JSON.stringify(data.raw_text);
+    });
+</script>
 
 </body>
 </html>
