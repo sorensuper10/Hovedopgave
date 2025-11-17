@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # --- 4. Kopiér Python-filer ---
-COPY . /app
+COPY python-worker /app
 
 # --- 5. Installér Python dependencies (men vi gør Torch nemmere) ---
 RUN pip install --upgrade pip
