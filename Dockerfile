@@ -20,7 +20,7 @@ RUN pip install --upgrade pip
 RUN pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
 
 # EasyOCR + FastAPI + Uvicorn
-RUN pip install easyocr fastapi uvicorn python-multipart opencv-python-headless
+RUN pip install easyocr fastapi uvicorn python-multipart opencv-python-headless google-cloud-vision protobuf==4.25.1
 
 # --- 6. Expose port 8000 ---
 EXPOSE 8000
