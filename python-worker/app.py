@@ -1,21 +1,23 @@
 import os
 import tempfile
-
-from fastapi import FastAPI, UploadFile, File
-import easyocr
-import cv2
-import numpy as np
-import re
-from google.cloud import vision
 import io
+import re
+import cv2
+import easyocr
+import numpy as np
+from fastapi import FastAPI, UploadFile, File
+from google.cloud import vision
 
 app = FastAPI()
 
-# Nummerplader → EasyOCR
+# === EasyOCR til nummerplader ===
 reader = easyocr.Reader(['en'], gpu=False)
 
-# === GOOGLE CREDENTIALS FROM RAILWAY ===
+# === GOOGLE CREDENTIALS FRA RAILWAY ENV ===
 creds_json = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")
+
+if creds_json is None:
+    raise Exception("❌ Railway environment variable GOOGLE_APPLICATION_CREDENTIALS_JSON mangler!")
 
 with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as temp:
     temp.write(creds_json.encode("utf-8"))
@@ -24,6 +26,7 @@ with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as temp:
 vision_client = vision.ImageAnnotatorClient.from_service_account_file(temp_path)
 
 
+# 🔍 Auto-crop af nummerplade
 def auto_crop_plate(image_path):
     img = cv2.imread(image_path)
 
@@ -48,9 +51,8 @@ def auto_crop_plate(image_path):
     return None
 
 
-def extract_km_google(image_path):
-    """ KM-detektion (Vision OCR kode) """
-
+# 🔧 KM-detektion (med anti-falsk-positiv filter)
+def extract_km_google(image_path, plate_digits=None):
     with io.open(image_path, "rb") as f:
         content = f.read()
 
@@ -67,12 +69,11 @@ def extract_km_google(image_path):
     words = annotations[0].description.split()
     lower_words = [w.lower() for w in words]
 
-    # ----- TRIP METER MODE -----
+    # === TRIP METER MODE (indeholder "km") ===
     if "km" in lower_words:
         km_index = lower_words.index("km")
         before = words[:km_index]
 
-        # Saml "2" + "13.3" → "213.3"
         if len(before) >= 2:
             combined = before[-2] + before[-1]
             m = re.search(r"\d+\.\d+", combined)
@@ -86,15 +87,25 @@ def extract_km_google(image_path):
 
         return None
 
-    # ----- ODOMETER MODE -----
+    # === ODOMETER MODE ===
     cleaned = [re.sub(r"[^0-9]", "", w) for w in words]
     combined = "".join(cleaned)
 
     m = re.search(r"\d{5,7}", combined)
-    if m:
-        return m.group(0)
+    if not m:
+        return None
 
-    return None
+    km_candidate = m.group(0)
+
+    # ❌ Bloker hvis KM matcher nummerpladens tal
+    if plate_digits and km_candidate == plate_digits:
+        return None
+
+    # ❌ Hvis tallet er for lille til at være et km-tal
+    if int(km_candidate) < 1000:
+        return None
+
+    return km_candidate
 
 
 @app.post("/ocr")
@@ -105,26 +116,33 @@ async def ocr_scan(image: UploadFile = File(...)):
         with open("temp.jpg", "wb") as f:
             f.write(content)
 
-        # === 1️⃣ AUTO CROP + NUMMERPLADE ===
+        # === Auto-crop af plade ===
         crop_path = auto_crop_plate("temp.jpg")
         plate_image = crop_path if crop_path else "temp.jpg"
 
-        # Nummerplade OCR
-        plate_raw = reader.readtext(plate_image, detail=0)
-        cleaned_plate = [re.sub(r'[^A-Za-z0-9]', '', t).upper() for t in plate_raw]
+        # === Nummerplade OCR ===
+        plate_raw_full = reader.readtext(plate_image, detail=1)
+
+        # Raw OCR som tekstliste (fx: ["DK", "CV", "90", "593"])
+        plate_raw_list = [item[1] for item in plate_raw_full]
+
+        # Rens og saml nummerpladen
+        cleaned_plate = [re.sub(r"[^A-Za-z0-9]", "", t).upper() for t in plate_raw_list]
         combined_plate = "".join(cleaned_plate)
 
         plate = None
-        m = re.search(r"[A-Z]{2}[0-9]{5}", combined_plate)
+        plate_digits = None
+
+        m = re.search(r"[A-Z]{2}([0-9]{5})", combined_plate)
         if m:
             plate = m.group(0)
+            plate_digits = m.group(1)
 
-        # === 2️⃣ KM DETEKTION (Google Vision) ===
-        km = extract_km_google("temp.jpg")
+        # === KM-detektion ===
+        km = extract_km_google("temp.jpg", plate_digits)
 
-        # RETURN
         return {
-            "raw_plate_text": plate_raw,
+            "raw_plate_text": plate_raw_list,
             "detected_plate": plate,
             "detected_km": km,
             "auto_crop_used": crop_path is not None
