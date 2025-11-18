@@ -1,52 +1,45 @@
 from fastapi import FastAPI, UploadFile, File
 import easyocr
 import re
-import json
 
 app = FastAPI()
 
-# --- Opret EasyOCR reader én gang ---
 reader = easyocr.Reader(['en'], gpu=False)
-
 
 @app.post("/ocr")
 async def ocr_scan(image: UploadFile = File(...)):
     try:
-        # --- Læs filen ---
+        # Gem billede
         content = await image.read()
-
-        # --- Gem temp billede ---
         with open("temp.jpg", "wb") as f:
             f.write(content)
 
-        # --- Kør OCR ---
-        result = reader.readtext("temp.jpg", detail=0)  # detail=0 = kun tekst
+        # OCR - præcis som PyCharm
+        result = reader.readtext("temp.jpg", detail=0)
 
-        # --- 4. Rens til nummerplade ---
-        cleaned_alnum_words = [
+        # --- Nummerplade logik (PyCharm style) ---
+        cleaned_words = [
             re.sub(r'[^A-Za-z0-9]', '', txt).upper()
             for txt in result
         ]
-        combined_alnum = "".join(cleaned_alnum_words)
+        combined = "".join(cleaned_words)
 
         plate = None
-        plate_match = re.search(r'[A-Z]{2}[0-9]{5}', combined_alnum)
-        if plate_match:
-            plate = plate_match.group(0)
+        match = re.search(r'[A-Z]{2}[0-9]{5}', combined)
+        if match:
+            plate = match.group(0)
 
-        # --- 5. Rens til KM-tal ---
+        # --- KM logik (kør kun hvis der IKKE er nummerplade) ---
         km = None
         if not plate:
-            digits_only = "".join(
-                re.sub(r'[^0-9]', '', txt) for txt in result
-            )
+            digits_only = "".join(re.sub(r'[^0-9]', '', txt) for txt in result)
             km_match = re.search(r'\d{5,7}', digits_only)
             if km_match:
                 km = km_match.group(0)
 
-        # --- 6. Returner OCR-resultat ---
         return {
             "raw_text": result,
+            "combined": combined,
             "detected_plate": plate,
             "detected_km": km
         }
