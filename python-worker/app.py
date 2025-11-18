@@ -1,3 +1,6 @@
+import os
+import tempfile
+
 from fastapi import FastAPI, UploadFile, File
 import easyocr
 import cv2
@@ -11,8 +14,14 @@ app = FastAPI()
 # Nummerplader → EasyOCR
 reader = easyocr.Reader(['en'], gpu=False)
 
-# KM → Google Vision
-vision_client = vision.ImageAnnotatorClient()
+# === GOOGLE CREDENTIALS FROM RAILWAY ===
+creds_json = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")
+
+with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as temp:
+    temp.write(creds_json.encode("utf-8"))
+    temp_path = temp.name
+
+vision_client = vision.ImageAnnotatorClient.from_service_account_file(temp_path)
 
 
 def auto_crop_plate(image_path):
