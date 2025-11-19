@@ -45,8 +45,9 @@ def auto_crop_plate(image_path):
     return None
 
 
-# === NY forbedret KM funktion ===
 def extract_km_google(image_path):
+    """Kun ODOMETER → 5-7 cifre."""
+
     with io.open(image_path, "rb") as f:
         content = f.read()
 
@@ -62,24 +63,14 @@ def extract_km_google(image_path):
 
     words = annotations[0].description.split()
 
-    # --- 1) Prøv ODOMETER først (5–7 cifre) ---
-    digits_only = [re.sub(r"[^0-9]", "", w) for w in words]
-    joined = "".join(digits_only)
+    # Rens alt → kun cifre
+    numbers = [re.sub(r"[^0-9]", "", w) for w in words]
+    combined = "".join(numbers)
 
-    m = re.search(r"\b(\d{5,7})\b", joined)
+    # Find odometer → 5 til 7 cifre
+    m = re.search(r"\d{5,7}", combined)
     if m:
-        return m.group(1)
-
-    # --- 2) Trip-meter som fallback (f.eks. 213.3 km) ---
-    lower_words = [w.lower() for w in words]
-
-    if "km" in lower_words:
-        km_index = lower_words.index("km")
-        before = words[:km_index]
-
-        m = re.search(r"\d+\.\d+", " ".join(before))
-        if m:
-            return m.group(0)
+        return m.group(0)
 
     return None
 
@@ -105,12 +96,11 @@ async def ocr_scan(image: UploadFile = File(...)):
         if m:
             plate = m.group(0)
 
-        # === KM (kun hvis ingen nummerplade) ===
+        # === KM (KUN ODOMETER-NUMMER) ===
         km = None
         if plate is None:
             km = extract_km_google("temp.jpg")
 
-        # === OUTPUT ===
         return {
             "detected_plate": plate if plate else "",
             "detected_km": km if km else ""
