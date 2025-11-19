@@ -7,6 +7,7 @@ const mongoose = require('mongoose'); // Mongoose bruges til at forbinde og arbe
 const session = require("express-session"); // express-session håndterer login-sessioner
 const userRoute = require("./routes/userRoutes"); // Import af userRoutes filen
 const scanRoute = require('./routes/scan');
+const motorApiRoute = require("./routes/motorApiRoute");
 
 // Initialiser Express-applikationen
 const app = express();
@@ -43,6 +44,8 @@ app.use(express.static('public'));
 app.use('/api/users', userRoute);
 
 app.use('/scan', scanRoute);
+
+app.use('/api/motors', motorApiRoute);
 
 // Start Express-serveren og log besked i konsollen
 app.listen(port, () => console.log(`🚀 Server running on http://localhost:${port}`));
