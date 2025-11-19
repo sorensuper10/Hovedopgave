@@ -45,6 +45,7 @@ def auto_crop_plate(image_path):
     return None
 
 
+# === NY forbedret KM funktion ===
 def extract_km_google(image_path):
     with io.open(image_path, "rb") as f:
         content = f.read()
@@ -53,43 +54,34 @@ def extract_km_google(image_path):
     response = vision_client.text_detection(image=image)
 
     if response.error.message:
-        return None, []
+        return None
 
     annotations = response.text_annotations
     if not annotations:
-        return None, []
+        return None
 
     words = annotations[0].description.split()
-    raw_google = words[:]  # GEM RAW GOOGLE OCR
 
+    # --- 1) Prøv ODOMETER først (5–7 cifre) ---
+    digits_only = [re.sub(r"[^0-9]", "", w) for w in words]
+    joined = "".join(digits_only)
+
+    m = re.search(r"\b(\d{5,7})\b", joined)
+    if m:
+        return m.group(1)
+
+    # --- 2) Trip-meter som fallback (f.eks. 213.3 km) ---
     lower_words = [w.lower() for w in words]
 
-    # TRIP MODE
     if "km" in lower_words:
         km_index = lower_words.index("km")
         before = words[:km_index]
 
-        if len(before) >= 2:
-            combined = before[-2] + before[-1]
-            m = re.search(r"\d+\.\d+", combined)
-            if m:
-                return m.group(0), raw_google
-
         m = re.search(r"\d+\.\d+", " ".join(before))
         if m:
-            return m.group(0), raw_google
+            return m.group(0)
 
-        return None, raw_google
-
-    # ODOMETER MODE
-    cleaned = [re.sub(r"[^0-9]", "", w) for w in words]
-    combined = "".join(cleaned)
-
-    m = re.search(r"\d{5,7}", combined)
-    if m:
-        return m.group(0), raw_google
-
-    return None, raw_google
+    return None
 
 
 @app.post("/ocr")
@@ -100,7 +92,7 @@ async def ocr_scan(image: UploadFile = File(...)):
         with open("temp.jpg", "wb") as f:
             f.write(content)
 
-        # === 1️⃣ NUMMERPLADE ===
+        # === NUMMERPLADE ===
         crop_path = auto_crop_plate("temp.jpg")
         plate_image = crop_path if crop_path else "temp.jpg"
 
@@ -113,18 +105,15 @@ async def ocr_scan(image: UploadFile = File(...)):
         if m:
             plate = m.group(0)
 
-        # === 2️⃣ KM (kun hvis ingen nummerplade fundet) ===
+        # === KM (kun hvis ingen nummerplade) ===
         km = None
-        raw_km_ocr = []
-
         if plate is None:
-            km, raw_km_ocr = extract_km_google("temp.jpg")
+            km = extract_km_google("temp.jpg")
 
         # === OUTPUT ===
         return {
             "detected_plate": plate if plate else "",
-            "detected_km": km if km else "",
-            "raw_ocr": plate_raw if plate else raw_km_ocr
+            "detected_km": km if km else ""
         }
 
     except Exception as e:
