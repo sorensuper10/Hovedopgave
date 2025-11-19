@@ -165,7 +165,7 @@
         infoBox.innerHTML = "⏳ Henter data fra MotorAPI…";
 
         try {
-            const res = await fetch(`/vehicle/${plate}`);
+            const res = await fetch(`/vehicles/${plate}`);
             const data = await res.json();
 
             infoBox.innerHTML = `
