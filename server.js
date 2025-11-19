@@ -45,7 +45,7 @@ app.use('/api/users', userRoute);
 
 app.use('/scan', scanRoute);
 
-app.use('/api/motors', motorApiRoute);
+app.use('/vehicle', motorApiRoute);
 
 // Start Express-serveren og log besked i konsollen
 app.listen(port, () => console.log(`🚀 Server running on http://localhost:${port}`));
