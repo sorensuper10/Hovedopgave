@@ -1,22 +1,19 @@
 import os
 import tempfile
-import io
-import re
-
-import cv2
-import easyocr
 from fastapi import FastAPI, UploadFile, File
+import easyocr
+import cv2
+import re
 from google.cloud import vision
+import io
 
 app = FastAPI()
 
 # === EasyOCR til nummerplader ===
 reader = easyocr.Reader(['en'], gpu=False)
 
-# === Google Vision credentials (Railway env) ===
+# === Google Vision credentials ===
 creds_json = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")
-if not creds_json:
-    raise RuntimeError("GOOGLE_APPLICATION_CREDENTIALS_JSON mangler i environment!")
 
 with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as temp:
     temp.write(creds_json.encode("utf-8"))
@@ -25,8 +22,7 @@ with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as temp:
 vision_client = vision.ImageAnnotatorClient.from_service_account_file(temp_path)
 
 
-# --- Auto-crop (forsøg på nummerplade) ---
-def auto_crop_plate(image_path: str):
+def auto_crop_plate(image_path):
     img = cv2.imread(image_path)
     if img is None:
         return None
@@ -40,18 +36,16 @@ def auto_crop_plate(image_path: str):
         x, y, w, h = cv2.boundingRect(cnt)
         aspect_ratio = w / float(h)
 
-        # Nummerplader er brede rektangler
         if 2.0 < aspect_ratio < 6.0 and w > 100:
             crop = img[y:y + h, x:x + w]
-            temp_crop = "crop.jpg"
-            cv2.imwrite(temp_crop, crop)
-            return temp_crop
+            temp_path = "crop.jpg"
+            cv2.imwrite(temp_path, crop)
+            return temp_path
 
     return None
 
 
-# --- KM-detektion via Google Vision ---
-def extract_km_google(image_path: str):
+def extract_km_google(image_path):
     with io.open(image_path, "rb") as f:
         content = f.read()
 
@@ -68,28 +62,28 @@ def extract_km_google(image_path: str):
     words = annotations[0].description.split()
     lower_words = [w.lower() for w in words]
 
-    # --- TRIP MODE ('2 19.3 km') ---
+    # TRIP MODE
     if "km" in lower_words:
         km_index = lower_words.index("km")
         before = words[:km_index]
 
-        # Saml fx "2" + "19.3" → "219.3"
         if len(before) >= 2:
             combined = before[-2] + before[-1]
             m = re.search(r"\d+\.\d+", combined)
             if m:
                 return m.group(0)
 
-        # Alternativ decimal match
         m = re.search(r"\d+\.\d+", " ".join(before))
         if m:
             return m.group(0)
 
         return None
 
-    # --- ODOMETER MODE (fx 135116) ---
-    digits = "".join(re.sub(r"[^0-9]", "", w) for w in words)
-    m = re.search(r"\d{5,7}", digits)
+    # ODOMETER MODE
+    cleaned = [re.sub(r"[^0-9]", "", w) for w in words]
+    combined = "".join(cleaned)
+
+    m = re.search(r"\d{5,7}", combined)
     if m:
         return m.group(0)
 
@@ -99,12 +93,11 @@ def extract_km_google(image_path: str):
 @app.post("/ocr")
 async def ocr_scan(image: UploadFile = File(...)):
     try:
-        # Gem billedet
         content = await image.read()
         with open("temp.jpg", "wb") as f:
             f.write(content)
 
-        # --- Nummerplade (EasyOCR) ---
+        # === NUMMERPLADE ===
         crop_path = auto_crop_plate("temp.jpg")
         plate_image = crop_path if crop_path else "temp.jpg"
 
@@ -117,7 +110,7 @@ async def ocr_scan(image: UploadFile = File(...)):
         if m:
             plate = m.group(0)
 
-        # --- KM DETEKTION (kun hvis ingen nummerplade) ---
+        # === KM DETEKTION ===
         km = None
         if plate is None:
             km = extract_km_google("temp.jpg")
