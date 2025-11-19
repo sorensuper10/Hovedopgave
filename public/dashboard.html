@@ -35,13 +35,23 @@
             margin: 15px auto 0 auto;
         }
 
+        /* ---- Køretøjsinfo styling ---- */
         #vehicleInfo {
-            margin-top: 20px;
-            padding: 12px;
-            border: 1px solid #bbb;
-            background: #f2f2f2;
-            text-align: left;
             display: none;
+            margin-top: 25px;
+            padding: 18px;
+            background: #eef3ff;
+            border: 1px solid #c8d4ff;
+            border-radius: 10px;
+            text-align: left;
+        }
+
+        #vehicleInfo h4 {
+            margin-top: 0;
+        }
+
+        .vehicle-line {
+            margin: 4px 0;
         }
     </style>
 </head>
@@ -55,23 +65,18 @@
     <section id="ai-scan">
         <h2>Scan nummerplade / km-tal</h2>
 
-        <!-- Filvalg -->
         <input type="file" id="imageInput" accept="image/*">
 
-        <!-- Forhåndsvisning -->
         <div id="previewContainer">
             <div id="previewBox">
                 <img id="previewImage" src="#" alt="Forhåndsvisning">
             </div>
         </div>
 
-        <!-- Scan knap -->
         <button id="scanBtn">Scan billede</button>
 
-        <!-- Loading -->
         <p id="loading" style="display:none;">⏳ Scanner billedet…</p>
 
-        <!-- Resultat -->
         <div id="result" style="display:none; margin-top:20px; padding:10px; border:1px solid #ccc; background:#f7f7f7;">
             <h3>Resultat:</h3>
 
@@ -79,7 +84,6 @@
                 <strong>Nummerplade:</strong>
                 <span id="plateResult"></span>
 
-                <!-- Søg info knap -->
                 <button id="searchVehicleBtn"
                         style="display:none; margin-left:10px; padding:4px 10px;">
                     Søg info
@@ -91,7 +95,6 @@
 
         <!-- Køretøjsinfo -->
         <div id="vehicleInfo"></div>
-
     </section>
 </main>
 
@@ -101,22 +104,27 @@
 
 <script src="dashboard.js"></script>
 
-<!-- AI SCAN SCRIPT -->
+
 <script>
-    // ======= VIS FORHÅNDSVISNING =======
+    /* ============================================
+       1) VIS FORHÅNDSVISNING
+       ============================================ */
     document.getElementById("imageInput").addEventListener("change", function () {
         const file = this.files[0];
         if (!file) return;
 
         const reader = new FileReader();
-        reader.onload = function (e) {
+        reader.onload = (e) => {
             document.getElementById("previewImage").src = e.target.result;
             document.getElementById("previewContainer").style.display = "block";
         };
         reader.readAsDataURL(file);
     });
 
-    // ======= SCAN BILLEDE =======
+
+    /* ============================================
+       2) SEND BILLEDE TIL /scan (OCR)
+       ============================================ */
     document.getElementById("scanBtn").addEventListener("click", async () => {
         const fileInput = document.getElementById("imageInput");
         if (!fileInput.files.length) {
@@ -137,14 +145,13 @@
         });
 
         const data = await response.json();
+
         document.getElementById("loading").style.display = "none";
         document.getElementById("result").style.display = "block";
 
-        // Indsæt OCR-resultater
         document.getElementById("plateResult").textContent = data.detected_plate || "Ingen fundet";
         document.getElementById("kmResult").textContent    = data.detected_km || "Ingen fundet";
 
-        // SØG-KNAP (kun hvis der er en nummerplade)
         const searchBtn = document.getElementById("searchVehicleBtn");
 
         if (data.detected_plate) {
@@ -155,27 +162,57 @@
         }
     });
 
-    // ======= SØG INFO FRA MOTORAPI =======
+
+    /* ============================================
+       3) HENT INFO FRA MOTORAPI
+       ============================================ */
     document.getElementById("searchVehicleBtn").addEventListener("click", async () => {
         const plate = document.getElementById("searchVehicleBtn").getAttribute("data-plate");
-        if (!plate) return;
 
         const infoBox = document.getElementById("vehicleInfo");
         infoBox.style.display = "block";
-        infoBox.innerHTML = "⏳ Henter data fra MotorAPI…";
+        infoBox.innerHTML = "⏳ Henter data…";
 
         try {
-            const res = await fetch(`/vehicles/${plate}`);
-            const data = await res.json();
+            const response = await fetch(`/vehicles/${plate}`);
+            const data = await response.json();
+
+            const v = data.vehicle;
+            const env = data.environment;
+            const mot = v.mot_info;
 
             infoBox.innerHTML = `
                 <h4>Køretøjsoplysninger</h4>
-                <pre>${JSON.stringify(data, null, 2)}</pre>
+
+                <div class="vehicle-line"><strong>Registreringsnummer:</strong> ${v.registration_number}</div>
+                <div class="vehicle-line"><strong>Status:</strong> ${v.status}</div>
+                <div class="vehicle-line"><strong>Mærke:</strong> ${v.make}</div>
+                <div class="vehicle-line"><strong>Model:</strong> ${v.model}</div>
+                <div class="vehicle-line"><strong>Variant:</strong> ${v.variant}</div>
+                <div class="vehicle-line"><strong>Årgang:</strong> ${v.model_year || "Ukendt"}</div>
+                <div class="vehicle-line"><strong>Brændstof:</strong> ${v.fuel_type}</div>
+                <div class="vehicle-line"><strong>Motor:</strong> ${v.engine_volume} ccm / ${v.engine_power} hk</div>
+
+                <hr>
+
+                <h4>Seneste syn</h4>
+                <div class="vehicle-line"><strong>Dato:</strong> ${mot?.date || "Ukendt"}</div>
+                <div class="vehicle-line"><strong>Resultat:</strong> ${mot?.result || "Ukendt"}</div>
+                <div class="vehicle-line"><strong>Kilometer ved syn:</strong> ${mot?.mileage || "Ukendt"}</div>
+
+                <hr>
+
+                <h4>Miljø</h4>
+                <div class="vehicle-line"><strong>CO₂:</strong> ${env.co2_emission} g/km</div>
+                <div class="vehicle-line"><strong>Brændstofforbrug:</strong> ${env.fuel_usage || "Ukendt"} km/l</div>
+                <div class="vehicle-line"><strong>Euro-norm:</strong> ${env.euro_norm}</div>
             `;
+
         } catch (err) {
-            infoBox.innerHTML = "❌ Fejl: MotorAPI kunne ikke hente data.";
+            infoBox.innerHTML = "❌ Fejl: Kunne ikke hente data.";
         }
     });
+
 </script>
 
 </body>
