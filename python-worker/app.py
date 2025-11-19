@@ -21,7 +21,6 @@ with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as temp:
 
 vision_client = vision.ImageAnnotatorClient.from_service_account_file(temp_path)
 
-
 def auto_crop_plate(image_path):
     img = cv2.imread(image_path)
     if img is None:
@@ -44,10 +43,8 @@ def auto_crop_plate(image_path):
 
     return None
 
-
 def extract_km_google(image_path):
-    """Kun ODOMETER → 5-7 cifre."""
-
+    """ Returnér det STØRSTE tal fra Google Vision. (odometer) """
     with io.open(image_path, "rb") as f:
         content = f.read()
 
@@ -63,17 +60,19 @@ def extract_km_google(image_path):
 
     words = annotations[0].description.split()
 
-    # Rens alt → kun cifre
-    numbers = [re.sub(r"[^0-9]", "", w) for w in words]
-    combined = "".join(numbers)
+    # Find alle heltal
+    numbers = []
 
-    # Find odometer → 5 til 7 cifre
-    m = re.search(r"\d{5,7}", combined)
-    if m:
-        return m.group(0)
+    for w in words:
+        cleaned = re.sub(r"[^0-9]", "", w)
+        if cleaned.isdigit():
+            numbers.append(int(cleaned))
 
-    return None
+    if not numbers:
+        return None
 
+    # Returnér det største tal = ODOMETER
+    return max(numbers)
 
 @app.post("/ocr")
 async def ocr_scan(image: UploadFile = File(...)):
