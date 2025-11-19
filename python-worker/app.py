@@ -53,13 +53,15 @@ def extract_km_google(image_path):
     response = vision_client.text_detection(image=image)
 
     if response.error.message:
-        return None
+        return None, []
 
     annotations = response.text_annotations
     if not annotations:
-        return None
+        return None, []
 
     words = annotations[0].description.split()
+    raw_google = words[:]  # GEM RAW GOOGLE OCR
+
     lower_words = [w.lower() for w in words]
 
     # TRIP MODE
@@ -71,13 +73,13 @@ def extract_km_google(image_path):
             combined = before[-2] + before[-1]
             m = re.search(r"\d+\.\d+", combined)
             if m:
-                return m.group(0)
+                return m.group(0), raw_google
 
         m = re.search(r"\d+\.\d+", " ".join(before))
         if m:
-            return m.group(0)
+            return m.group(0), raw_google
 
-        return None
+        return None, raw_google
 
     # ODOMETER MODE
     cleaned = [re.sub(r"[^0-9]", "", w) for w in words]
@@ -85,19 +87,20 @@ def extract_km_google(image_path):
 
     m = re.search(r"\d{5,7}", combined)
     if m:
-        return m.group(0)
+        return m.group(0), raw_google
 
-    return None
+    return None, raw_google
 
 
 @app.post("/ocr")
 async def ocr_scan(image: UploadFile = File(...)):
     try:
         content = await image.read()
+
         with open("temp.jpg", "wb") as f:
             f.write(content)
 
-        # === NUMMERPLADE ===
+        # === 1️⃣ NUMMERPLADE ===
         crop_path = auto_crop_plate("temp.jpg")
         plate_image = crop_path if crop_path else "temp.jpg"
 
@@ -110,14 +113,18 @@ async def ocr_scan(image: UploadFile = File(...)):
         if m:
             plate = m.group(0)
 
-        # === KM DETEKTION ===
+        # === 2️⃣ KM (kun hvis ingen nummerplade fundet) ===
         km = None
-        if plate is None:
-            km = extract_km_google("temp.jpg")
+        raw_km_ocr = []
 
+        if plate is None:
+            km, raw_km_ocr = extract_km_google("temp.jpg")
+
+        # === OUTPUT ===
         return {
             "detected_plate": plate if plate else "",
-            "detected_km": km if km else ""
+            "detected_km": km if km else "",
+            "raw_ocr": plate_raw if plate else raw_km_ocr
         }
 
     except Exception as e:
