@@ -16,7 +16,7 @@ with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as temp:
 
 vision_client = vision.ImageAnnotatorClient.from_service_account_file(temp_path)
 
-# GOOGLE VISION – NUMMERPLADE OCR
+# Google Vision – Nummerplade OCR
 def extract_plate_google(image_path):
     """Returnér dansk nummerplade (AA12345) ved hjælp af Google Vision OCR."""
     with io.open(image_path, "rb") as f:
@@ -44,7 +44,7 @@ def extract_plate_google(image_path):
     return match.group(0) if match else None
 
 
-# GOOGLE VISION – KM / ODOMETER OCR
+# Google Vision – KM OCR
 def extract_km_google(image_path):
     """Returnér det STØRSTE tal fra Vision OCR = odometer."""
     with io.open(image_path, "rb") as f:
@@ -73,7 +73,7 @@ def extract_km_google(image_path):
 
     return max(numbers)
 
-# FASTAPI ENDPOINT – BRUGER KUN GOOGLE VISION
+# FastAPI endpoint – Bruger Google Vision
 @app.post("/ocr")
 async def ocr_scan(image: UploadFile = File(...)):
     try:
@@ -83,11 +83,13 @@ async def ocr_scan(image: UploadFile = File(...)):
         with open("temp.jpg", "wb") as f:
             f.write(content)
 
-        # === NUMMERPLADE ===
+        # Nummerplade (Google Vision)
         plate = extract_plate_google("temp.jpg")
 
-        # === KM ===
-        km = extract_km_google("temp.jpg")
+        # KM — Kun hvis ingen nummerplade
+        km = None
+        if plate is None:
+            km = extract_km_google("temp.jpg")
 
         return {
             "detected_plate": plate if plate else "",
