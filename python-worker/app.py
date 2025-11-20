@@ -32,10 +32,10 @@ def extract_plate_google(image_path):
     if not annotations:
         return None
 
-    # Hele OCR-teksten
+    # Hele Vision-teksten
     full_text = annotations[0].description
 
-    # 1) Fjern "km" enheder
+    # 1) Fjern "213.3 km" type tekst (km-enheder)
     full_text = re.sub(r"\b\d+[.,]?\d*\s*km\b", " ", full_text, flags=re.IGNORECASE)
 
     # 2) Find dansk nummerplade med eller uden mellemrum
@@ -46,6 +46,10 @@ def extract_plate_google(image_path):
 
     letters = match.group(1).upper()
     digits = match.group(2)
+
+    # 🚫 3) UDELUK "KMxxxxx" — da KM kommer fra km-tælleren!
+    if letters == "KM":
+        return None
 
     return letters + digits
 
