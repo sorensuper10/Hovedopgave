@@ -88,27 +88,56 @@ def extract_km_google(image_path):
 
     return max(numbers)
 
+# Google Vision – Stelnummer (VIN)
+def extract_vin_google(image_path):
+    """Returnér 17-tegns VIN / stelnummer fra Google Vision OCR."""
+    with io.open(image_path, "rb") as f:
+        content = f.read()
+
+    image = vision.Image(content=content)
+    response = vision_client.text_detection(image=image)
+
+    if response.error.message:
+        return None
+
+    annotations = response.text_annotations
+    if not annotations:
+        return None
+
+    # Saml alt tekst, fjern mellemrum og linjeskift
+    text = annotations[0].description.upper()
+    text = text.replace(" ", "").replace("\n", "")
+
+    # VIN-regex (ingen I, O, Q)
+    vin_pattern = r"[A-HJ-NPR-Z0-9]{17}"
+
+    match = re.search(vin_pattern, text)
+    return match.group(0) if match else None
+
 # FastAPI endpoint – Bruger Google Vision
 @app.post("/ocr")
 async def ocr_scan(image: UploadFile = File(...)):
     try:
-        # Gem uploadet billede midlertidigt
+        # Gem uploadet billede
         content = await image.read()
-
         with open("temp.jpg", "wb") as f:
             f.write(content)
 
-        # Nummerplade (Google Vision)
+        # Nummerplade
         plate = extract_plate_google("temp.jpg")
 
-        # KM — Kun hvis ingen nummerplade
+        # Stelnummer (VIN)
+        vin = extract_vin_google("temp.jpg")
+
+        # KM (kun hvis ingen nummerplade og ingen vin)
         km = None
-        if plate is None:
+        if plate is None and vin is None:
             km = extract_km_google("temp.jpg")
 
         return {
             "detected_plate": plate if plate else "",
-            "detected_km": km if km else ""
+            "detected_km": km if km else "",
+            "detected_vin": vin if vin else ""
         }
 
     except Exception as e:

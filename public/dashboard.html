@@ -91,6 +91,8 @@
             </p>
 
             <p><strong>KM-tal:</strong> <span id="kmResult"></span></p>
+
+            <p><strong>Stelnummer (VIN):</strong> <span id="vinResult"></span></p>
         </div>
 
         <!-- Køretøjsinfo -->
@@ -151,6 +153,7 @@
 
         document.getElementById("plateResult").textContent = data.detected_plate || "Ingen fundet";
         document.getElementById("kmResult").textContent    = data.detected_km || "Ingen fundet";
+        document.getElementById("vinResult").textContent   = data.detected_vin || "Ingen fundet";
 
         const searchBtn = document.getElementById("searchVehicleBtn");
 
