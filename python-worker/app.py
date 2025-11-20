@@ -18,7 +18,7 @@ vision_client = vision.ImageAnnotatorClient.from_service_account_file(temp_path)
 
 # Google Vision – Nummerplade OCR
 def extract_plate_google(image_path):
-    """Returnér dansk nummerplade (AA12345) ved hjælp af Google Vision OCR."""
+    """Returnér alle typer danske nummerplader (bil, MC, varebil, diplomat, el osv.)."""
     with io.open(image_path, "rb") as f:
         content = f.read()
 
@@ -32,25 +32,31 @@ def extract_plate_google(image_path):
     if not annotations:
         return None
 
-    full_text = annotations[0].description
+    full_text = annotations[0].description.upper()
 
-    # Fjern km-enheder (for km-billeder)
-    full_text = re.sub(r"\b\d+[.,]?\d*\s*km\b", " ", full_text, flags=re.IGNORECASE)
+    # 1) Fjern "km" enheder
+    full_text = re.sub(r"\b\d+[.,]?\d*\s*KM\b", " ", full_text)
 
-    # Dansk nummerplade: AA 12 345 (med eller uden mellemrum)
-    match = re.search(r"\b([A-Z]{2})\s*([0-9]{2})\s*([0-9]{3})\b", full_text, flags=re.IGNORECASE)
+    # 2) Mulige danske plade-formater (i rækkefølge)
+    patterns = [
+        r"\b([A-Z]{2})\s*([0-9]{2})\s*([0-9]{3})\b",  # Standard bilplade (AA 12 345)
+        r"\b([A-Z]{2})\s*([0-9]{3})\b",               # MC plade (AA 123)
+        r"\b([A-Z]{2})\s*([0-9]{4})\b",               # EU-export (AA 1234)
+    ]
 
-    if not match:
-        return None
+    for pat in patterns:
+        m = re.search(pat, full_text)
+        if m:
+            letters = m.group(1)
+            digits = "".join(m.groups()[1:])
 
-    letters = match.group(1).upper()
-    digits = match.group(2) + match.group(3)
+            # Undgå "KMxxxxx" falske plader
+            if letters == "KM":
+                continue
 
-    # Undgå "KMxxxxx" falske resultater
-    if letters == "KM":
-        return None
+            return letters + digits
 
-    return letters + digits
+    return None
 
 # Google Vision – KM OCR
 def extract_km_google(image_path):
