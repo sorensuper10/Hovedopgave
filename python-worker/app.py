@@ -32,22 +32,21 @@ def extract_plate_google(image_path):
     if not annotations:
         return None
 
-    # Hele Vision-teksten
     full_text = annotations[0].description
 
-    # 1) Fjern "213.3 km" type tekst (km-enheder)
+    # Fjern km-enheder (for km-billeder)
     full_text = re.sub(r"\b\d+[.,]?\d*\s*km\b", " ", full_text, flags=re.IGNORECASE)
 
-    # 2) Find dansk nummerplade med eller uden mellemrum
-    match = re.search(r"\b([A-Z]{2})\s*([0-9]{5})\b", full_text, flags=re.IGNORECASE)
+    # Dansk nummerplade: AA 12 345 (med eller uden mellemrum)
+    match = re.search(r"\b([A-Z]{2})\s*([0-9]{2})\s*([0-9]{3})\b", full_text, flags=re.IGNORECASE)
 
     if not match:
         return None
 
     letters = match.group(1).upper()
-    digits = match.group(2)
+    digits = match.group(2) + match.group(3)
 
-    # 🚫 3) UDELUK "KMxxxxx" — da KM kommer fra km-tælleren!
+    # Undgå "KMxxxxx" falske resultater
     if letters == "KM":
         return None
 
