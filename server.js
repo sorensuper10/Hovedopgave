@@ -6,7 +6,7 @@ const express = require('express'); // Express bruges til at oprette webserver o
 const mongoose = require('mongoose'); // Mongoose bruges til at forbinde og arbejde med MongoDB
 const session = require("express-session"); // express-session håndterer login-sessioner
 const userRoute = require("./routes/userRoutes"); // Import af userRoutes filen
-const scanRoute = require('./routes/scan');
+const scanRoute = require('./routes/scanRoute');
 const motorApiRoute = require("./routes/motorApiRoute");
 
 // Initialiser Express-applikationen
