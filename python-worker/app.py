@@ -40,8 +40,9 @@ def extract_plate_google(image_path):
     # 2) Mulige danske plade-formater (i rækkefølge)
     patterns = [
         r"\b([A-Z]{2})\s*([0-9]{2})\s*([0-9]{3})\b",  # Standard bilplade (AA 12 345)
-        r"\b([A-Z]{2})\s*([0-9]{3})\b",               # MC plade (AA 123)
-        r"\b([A-Z]{2})\s*([0-9]{4})\b",               # EU-export (AA 1234)
+        r"\b([A-Z]{2})\s*([0-9]{2})\s*([0-9]{2})\b",  # GUL varebilplade (AA 12 34)
+        r"\b([A-Z]{2})\s*([0-9]{3})\b",               # MC-plade (AA 123)
+        r"\b([A-Z]{2})\s*([0-9]{4})\b",               # Export (AA 1234)
     ]
 
     for pat in patterns:
