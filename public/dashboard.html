@@ -184,15 +184,22 @@
             const env = data.environment;
             const mot = v.mot_info;
 
+            // Beregn årgang
+            const year = (v.model_year && v.model_year > 0)
+                ? v.model_year
+                : (v.first_registration ? v.first_registration.substring(0, 4) : "Ukendt");
+
             infoBox.innerHTML = `
                 <h4>Køretøjsoplysninger</h4>
 
                 <div class="vehicle-line"><strong>Registreringsnummer:</strong> ${v.registration_number}</div>
                 <div class="vehicle-line"><strong>Status:</strong> ${v.status}</div>
+                <div class="vehicle-line"><strong>Type:</strong> ${v.type}</div>
+                <div class="vehicle-line"><strong>Anvendelse:</strong> ${v.use}</div>
                 <div class="vehicle-line"><strong>Mærke:</strong> ${v.make}</div>
                 <div class="vehicle-line"><strong>Model:</strong> ${v.model}</div>
                 <div class="vehicle-line"><strong>Variant:</strong> ${v.variant}</div>
-                <div class="vehicle-line"><strong>Årgang:</strong> ${v.model_year || "Ukendt"}</div>
+                <div class="vehicle-line"><strong>Årgang:</strong> ${year}</div>
                 <div class="vehicle-line"><strong>Brændstof:</strong> ${v.fuel_type}</div>
                 <div class="vehicle-line"><strong>Motor:</strong> ${v.engine_volume} ccm / ${v.engine_power} hk</div>
 
