@@ -32,17 +32,22 @@ def extract_plate_google(image_path):
     if not annotations:
         return None
 
-    # Hele OCR-teksten fra Vision
+    # Hele OCR-teksten
     full_text = annotations[0].description
 
-    # Rens tekst: behold kun A-Z og tal
-    cleaned = re.sub(r"[^A-Za-z0-9]", "", full_text).upper()
+    # 1) Fjern "km" enheder
+    full_text = re.sub(r"\b\d+[.,]?\d*\s*km\b", " ", full_text, flags=re.IGNORECASE)
 
-    # Find dansk nummerplade (AA12345)
-    match = re.search(r"[A-Z]{2}[0-9]{5}", cleaned)
+    # 2) Find dansk nummerplade med eller uden mellemrum
+    match = re.search(r"\b([A-Z]{2})\s*([0-9]{5})\b", full_text, flags=re.IGNORECASE)
 
-    return match.group(0) if match else None
+    if not match:
+        return None
 
+    letters = match.group(1).upper()
+    digits = match.group(2)
+
+    return letters + digits
 
 # Google Vision – KM OCR
 def extract_km_google(image_path):
