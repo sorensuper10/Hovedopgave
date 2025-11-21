@@ -67,7 +67,7 @@ def extract_plate_google(image_path):
 # GOOGLE VISION – KM
 # ===============================================================
 def extract_km_google(image_path):
-    """Find realistisk km-tal: 4–7 cifre (undgår VIN, speedometer m.m.)."""
+    """Find kilometertal: længste rene talsekvens fra instrumentbræt."""
     with io.open(image_path, "rb") as f:
         content = f.read()
 
@@ -81,24 +81,16 @@ def extract_km_google(image_path):
     if not annotations:
         return None
 
-    words = annotations[0].description.split()
+    text = annotations[0].description
 
-    numbers = []
-    for w in words:
-        cleaned = re.sub(r"[^0-9]", "", w)
+    # Find alle rene tal (ingen bogstaver)
+    all_numbers = re.findall(r"\b\d{4,7}\b", text)
 
-        # KM-tal er typisk 4–7 cifre
-        if len(cleaned) < 4 or len(cleaned) > 7:
-            continue
-
-        if cleaned.isdigit():
-            numbers.append(int(cleaned))
-
-    if not numbers:
+    if not all_numbers:
         return None
 
-    return max(numbers)
-
+    # returnér det længste tal
+    return max(all_numbers, key=len)
 
 # ===============================================================
 # GOOGLE VISION – VIN
