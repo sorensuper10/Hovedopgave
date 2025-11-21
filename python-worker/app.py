@@ -16,9 +16,12 @@ with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as temp:
 
 vision_client = vision.ImageAnnotatorClient.from_service_account_file(temp_path)
 
-# Google Vision – Nummerplade OCR
+
+# ===============================================================
+# GOOGLE VISION – NUMMERPLADE
+# ===============================================================
 def extract_plate_google(image_path):
-    """Returnér alle typer danske nummerplader (bil, MC, varebil, diplomat, el osv.)."""
+    """Returnér danske plader: bil, MC, varebil, diplomat, eksport osv."""
     with io.open(image_path, "rb") as f:
         content = f.read()
 
@@ -34,15 +37,15 @@ def extract_plate_google(image_path):
 
     full_text = annotations[0].description.upper()
 
-    # 1) Fjern "km" enheder
+    # Fjern KM-enheder fra OCR
     full_text = re.sub(r"\b\d+[.,]?\d*\s*KM\b", " ", full_text)
 
-    # 2) Mulige danske plade-formater (i rækkefølge)
+    # Nummerplade-formater
     patterns = [
-        r"\b([A-Z]{2})\s*([0-9]{2})\s*([0-9]{3})\b",  # Standard bilplade (AA 12 345)
-        r"\b([A-Z]{2})\s*([0-9]{2})\s*([0-9]{2})\b",  # GUL varebilplade (AA 12 34)
-        r"\b([A-Z]{2})\s*([0-9]{3})\b",               # MC-plade (AA 123)
-        r"\b([A-Z]{2})\s*([0-9]{4})\b",               # Export (AA 1234)
+        r"\b([A-Z]{2})\s*([0-9]{2})\s*([0-9]{3})\b",  # Standard bil (AB 12 345)
+        r"\b([A-Z]{2})\s*([0-9]{2})\s*([0-9]{2})\b",  # Gul varebil (AB 12 34)
+        r"\b([A-Z]{2})\s*([0-9]{3})\b",               # MC (AB 123)
+        r"\b([A-Z]{2})\s*([0-9]{4})\b",               # Eksport (AB 1234)
     ]
 
     for pat in patterns:
@@ -59,9 +62,12 @@ def extract_plate_google(image_path):
 
     return None
 
-# Google Vision – KM OCR
+
+# ===============================================================
+# GOOGLE VISION – KM
+# ===============================================================
 def extract_km_google(image_path):
-    """Returnér det STØRSTE tal fra Vision OCR = odometer."""
+    """Find realistisk km-tal: 4–7 cifre (undgår VIN, speedometer m.m.)."""
     with io.open(image_path, "rb") as f:
         content = f.read()
 
@@ -80,6 +86,11 @@ def extract_km_google(image_path):
     numbers = []
     for w in words:
         cleaned = re.sub(r"[^0-9]", "", w)
+
+        # KM-tal er typisk 4–7 cifre
+        if len(cleaned) < 4 or len(cleaned) > 7:
+            continue
+
         if cleaned.isdigit():
             numbers.append(int(cleaned))
 
@@ -88,9 +99,12 @@ def extract_km_google(image_path):
 
     return max(numbers)
 
-# Google Vision – Stelnummer (VIN)
+
+# ===============================================================
+# GOOGLE VISION – VIN
+# ===============================================================
 def extract_vin_google(image_path):
-    """Returnér 17-tegns VIN / stelnummer fra Google Vision OCR."""
+    """Find 17-tegns VIN (stelnummer)."""
     with io.open(image_path, "rb") as f:
         content = f.read()
 
@@ -104,40 +118,34 @@ def extract_vin_google(image_path):
     if not annotations:
         return None
 
-    # Saml alt tekst, fjern mellemrum og linjeskift
-    text = annotations[0].description.upper()
-    text = text.replace(" ", "").replace("\n", "")
+    text = annotations[0].description.upper().replace(" ", "").replace("\n", "")
 
-    # VIN-regex (ingen I, O, Q)
-    vin_pattern = r"[A-HJ-NPR-Z0-9]{17}"
+    vin_pattern = r"[A-HJ-NPR-Z0-9]{17}"  # VIN uden I, O, Q
 
     match = re.search(vin_pattern, text)
     return match.group(0) if match else None
 
-# FastAPI endpoint – Bruger Google Vision
+
+# ===============================================================
+# FASTAPI ENDPOINT
+# ===============================================================
 @app.post("/ocr")
 async def ocr_scan(image: UploadFile = File(...)):
     try:
-        # Gem uploadet billede
+        # Gem midlertidigt billede
         content = await image.read()
         with open("temp.jpg", "wb") as f:
             f.write(content)
 
-        # Nummerplade
+        # Kør alle tre funktioner
         plate = extract_plate_google("temp.jpg")
-
-        # Stelnummer (VIN)
-        vin = extract_vin_google("temp.jpg")
-
-        # KM (kun hvis ingen nummerplade og ingen vin)
-        km = None
-        if plate is None and vin is None:
-            km = extract_km_google("temp.jpg")
+        vin   = extract_vin_google("temp.jpg")
+        km    = extract_km_google("temp.jpg")
 
         return {
-            "detected_plate": plate if plate else "",
-            "detected_km": km if km else "",
-            "detected_vin": vin if vin else ""
+            "detected_plate": plate or "",
+            "detected_km": km or "",
+            "detected_vin": vin or ""
         }
 
     except Exception as e:
