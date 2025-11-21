@@ -106,7 +106,7 @@ def extract_km_google(image_path):
 
 # Google Vision – Stelnummer (VIN)
 def extract_vin_google(image_path):
-    """Returnér 17-tegns VIN / stelnummer fra Google Vision OCR."""
+    """Find stelnummer (VIN) og undgå alle instrumentbræt-tal."""
     with io.open(image_path, "rb") as f:
         content = f.read()
 
@@ -120,15 +120,33 @@ def extract_vin_google(image_path):
     if not annotations:
         return None
 
-    # Saml alt tekst, fjern mellemrum og linjeskift
     text = annotations[0].description.upper()
+
+    # Fjern whitespace
     text = text.replace(" ", "").replace("\n", "")
 
-    # VIN-regex (ingen I, O, Q)
-    vin_pattern = r"[A-HJ-NPR-Z0-9]{17}"
+    # --- Fjern åbenlyst støj fra instrumentbræt ---
+    text = re.sub(r"\bKM[0-9A-Z]*", "", text)      # KMxxxx, KMST, KMT osv.
+    text = re.sub(r"\b[0-9]{4,7}\b", "", text)     # store tal som km-display
+    text = re.sub(r"[0-9]{1,3}KMH", "", text)      # hastighed
+    text = re.sub(r"[0-9]{1,3}KMT", "", text)
+    text = re.sub(r"STOP", "", text)
+    text = re.sub(r"TRIP", "", text)
+
+    # --- VIN må KUN være rent 17-tegn match ---
+    vin_pattern = r"\b[A-HJ-NPR-Z0-9]{17}\b"
 
     match = re.search(vin_pattern, text)
-    return match.group(0) if match else None
+    if not match:
+        return None
+
+    vin = match.group(0)
+
+    # Ekstra sikkerhed: stelnummer må ikke starte eller slutte med tal fra instrumentbrættet
+    if re.match(r"^\d{5,}$", vin):
+        return None
+
+    return vin
 
 # ===============================================================
 # FASTAPI ENDPOINT
