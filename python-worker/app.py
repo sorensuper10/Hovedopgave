@@ -92,11 +92,9 @@ def extract_km_google(image_path):
     # returnér det længste tal
     return max(all_numbers, key=len)
 
-# ===============================================================
-# GOOGLE VISION – VIN
-# ===============================================================
+# Google Vision – Stelnummer (VIN)
 def extract_vin_google(image_path):
-    """Finder stelnummer (VIN) og undgår at forveksle det med kilometertal."""
+    """Returnér 17-tegns VIN / stelnummer fra Google Vision OCR."""
     with io.open(image_path, "rb") as f:
         content = f.read()
 
@@ -110,21 +108,14 @@ def extract_vin_google(image_path):
     if not annotations:
         return None
 
+    # Saml alt tekst, fjern mellemrum og linjeskift
     text = annotations[0].description.upper()
-
-    # Fjern mellemrum og linjeskift
     text = text.replace(" ", "").replace("\n", "")
 
-    # Fjern ting som Google ofte læser på instrumentbræt
-    text = re.sub(r"\bKM[0-9A-Z]*", "", text)       # fjerner 'KM136367', 'KMST', osv.
-    text = re.sub(r"[0-9]{4,7}", "", text)          # fjern store tal (km-display)
-    text = re.sub(r"[0-9]{1,3}KMH", "", text)       # fjern hastighed
-    text = re.sub(r"[0-9]{1,3}KM/T", "", text)
-
-    # VIN regex (17 tegn – ingen I, O, Q)
+    # VIN-regex (ingen I, O, Q)
     vin_pattern = r"[A-HJ-NPR-Z0-9]{17}"
-    match = re.search(vin_pattern, text)
 
+    match = re.search(vin_pattern, text)
     return match.group(0) if match else None
 
 # ===============================================================
