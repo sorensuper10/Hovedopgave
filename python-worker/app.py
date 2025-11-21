@@ -154,15 +154,20 @@ def extract_vin_google(image_path):
 @app.post("/ocr")
 async def ocr_scan(image: UploadFile = File(...)):
     try:
-        # Gem midlertidigt billede
         content = await image.read()
         with open("temp.jpg", "wb") as f:
             f.write(content)
 
-        # Kør alle tre funktioner
+        # Først: VIN
+        vin = extract_vin_google("temp.jpg")
+
+        # Nummerplade
         plate = extract_plate_google("temp.jpg")
-        vin   = extract_vin_google("temp.jpg")
-        km    = extract_km_google("temp.jpg")
+
+        # KM kun hvis INGEN VIN og INGEN plade
+        km = None
+        if vin is None and plate is None:
+            km = extract_km_google("temp.jpg")
 
         return {
             "detected_plate": plate or "",
