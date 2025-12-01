@@ -53,8 +53,8 @@
             pointer-events: auto;
         }
 
-        #backBtn {
-            margin-top: 20px;
+        button {
+            margin-top: 10px;
             padding: 10px 20px;
             border: none;
             border-radius: 8px;
@@ -64,8 +64,14 @@
             cursor: pointer;
         }
 
-        #backBtn:hover {
+        button:hover {
             background: #0d47a1;
+        }
+
+        #control-buttons {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
         }
     </style>
 </head>
@@ -82,45 +88,43 @@
     <canvas id="canvasOverlay"></canvas>
 </div>
 
-<!-- 🎬 Animation kontrol -->
-<div id="controls" style="margin-top: 10px; display: flex; gap: 10px;">
-    <button id="startBtn">▶️ Start animation</button>
-    <button id="stopBtn">⏸️ Stop animation</button>
+<div id="control-buttons">
+    <button id="startAnimBtn">▶️ Start animation</button>
+    <button id="stopAnimBtn" disabled>⏸️ Stop animation</button>
+    <button id="toggleMarksBtn">✏️ Markering: Fra</button>
 </div>
 
-<!-- 🔙 Tilbage -->
-<button id="backBtn">Tilbage til Dashboard</button>
+<button id="backBtn">🔙 Tilbage til Dashboard</button>
 
 <script>
     // --- Generelle variabler ---
     let images = [];
     let frame = 0;
+    let zoom = 1;
+    let interval = null;
+    let initialDistance = 0;
     let isDragging = false;
     let startX = 0;
-    let zoom = 1;
-    let initialDistance = 0;
 
     const viewer = document.getElementById("viewer");
     const car = document.getElementById("car");
     const canvas = document.getElementById("canvasOverlay");
     const ctx = canvas.getContext("2d");
 
-    // --- Cirkler og touch kontrol ---
+    // --- Markeringer ---
+    let markingEnabled = false;
     let circles = [];
     let dragIndex = null;
     let dragStart = null;
     let lastTouchTime = 0;
 
-    // --- Hjælpemetode til touch-koordinater ---
+    // --- Hjælpefunktioner ---
     function getTouchPos(e) {
         const rect = canvas.getBoundingClientRect();
         const t = e.touches[0];
-        const x = t.clientX - rect.left;
-        const y = t.clientY - rect.top;
-        return { x, y };
+        return { x: t.clientX - rect.left, y: t.clientY - rect.top };
     }
 
-    // --- Tegn alle cirkler ---
     function drawCircles() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         circles.forEach(c => {
@@ -132,14 +136,13 @@
         });
     }
 
-    // --- Opdater aktuelt billede ---
     function updateImage() {
         car.src = images[frame];
     }
 
-    // --- Når brugeren vælger billeder ---
-    document.getElementById("imageInput").addEventListener("change", event => {
-        const files = Array.from(event.target.files);
+    // --- Upload billeder ---
+    document.getElementById("imageInput").addEventListener("change", e => {
+        const files = Array.from(e.target.files);
         if (!files.length) return alert("Vælg mindst ét billede.");
 
         files.sort((a, b) => a.name.localeCompare(b.name));
@@ -149,13 +152,12 @@
         updateImage();
         viewer.style.display = "block";
 
-        // Canvas-størrelse
         canvas.width = viewer.clientWidth;
         canvas.height = viewer.clientHeight;
         drawCircles();
     });
 
-    // --- Rotation med mus ---
+    // --- Rotation (mus) ---
     viewer.addEventListener("mousedown", e => {
         isDragging = true;
         startX = e.clientX;
@@ -179,7 +181,7 @@
         }
     });
 
-    // --- Zoom med scroll ---
+    // --- Zoom ---
     viewer.addEventListener("wheel", e => {
         e.preventDefault();
         zoom += e.deltaY < 0 ? 0.1 : -0.1;
@@ -187,13 +189,12 @@
         car.style.transform = canvas.style.transform = `scale(${zoom})`;
     });
 
-    // --- Dobbeltklik nulstiller zoom ---
     viewer.addEventListener("dblclick", () => {
         zoom = 1;
         car.style.transform = canvas.style.transform = "scale(1)";
     });
 
-    // --- Touchrotation og pinchzoom ---
+    // --- Touchrotation + pinchzoom ---
     let lastTouchX = 0;
 
     viewer.addEventListener("touchstart", e => {
@@ -207,7 +208,7 @@
     });
 
     viewer.addEventListener("touchmove", e => {
-        if (e.touches.length === 1) {
+        if (e.touches.length === 1 && !markingEnabled) {
             const touchX = e.touches[0].clientX;
             const delta = touchX - lastTouchX;
             if (Math.abs(delta) > 10 && images.length) {
@@ -219,7 +220,6 @@
             }
             e.preventDefault();
         }
-        // --- Pinch zoom ---
         if (e.touches.length === 2) {
             const dx = e.touches[0].clientX - e.touches[1].clientX;
             const dy = e.touches[0].clientY - e.touches[1].clientY;
@@ -233,30 +233,30 @@
         }
     });
 
-    // --- Touch events: tilføj/flyt/slet cirkler ---
+    // --- Markeringer på canvas ---
     canvas.addEventListener("touchstart", e => {
+        if (!markingEnabled) return;
         e.preventDefault();
-        if (e.touches.length === 1) {
-            const pos = getTouchPos(e);
-            dragIndex = circles.findIndex(c => Math.hypot(c.x - pos.x, c.y - pos.y) < c.radius);
-            dragStart = pos;
+        const pos = getTouchPos(e);
+        dragIndex = circles.findIndex(c => Math.hypot(c.x - pos.x, c.y - pos.y) < c.radius);
+        dragStart = pos;
 
-            if (dragIndex === -1) {
-                circles.push({ x: pos.x, y: pos.y, radius: 30, color: "red" });
+        if (dragIndex === -1) {
+            circles.push({ x: pos.x, y: pos.y, radius: 30, color: "red" });
+            drawCircles();
+        } else {
+            const now = Date.now();
+            if (now - lastTouchTime < 400) {
+                circles.splice(dragIndex, 1);
+                dragIndex = null;
                 drawCircles();
-            } else {
-                const now = Date.now();
-                if (now - lastTouchTime < 400) {
-                    circles.splice(dragIndex, 1);
-                    dragIndex = null;
-                    drawCircles();
-                }
-                lastTouchTime = now;
             }
+            lastTouchTime = now;
         }
     });
 
     canvas.addEventListener("touchmove", e => {
+        if (!markingEnabled) return;
         e.preventDefault();
         if (e.touches.length === 1 && dragIndex !== null) {
             const pos = getTouchPos(e);
@@ -271,28 +271,35 @@
         dragIndex = null;
     });
 
-    // --- Start/Stop animation ---
-    let interval = null;
+    // --- Animation ---
+    const startBtn = document.getElementById("startAnimBtn");
+    const stopBtn = document.getElementById("stopAnimBtn");
 
-    document.getElementById("startBtn").addEventListener("click", () => {
-        if (!images.length) {
-            alert("Vælg billeder først!");
-            return;
-        }
-        if (interval) return; // allerede i gang
+    startBtn.addEventListener("click", () => {
+        if (!images.length) return;
+        startBtn.disabled = true;
+        stopBtn.disabled = false;
 
         interval = setInterval(() => {
             frame = (frame + 1) % images.length;
             updateImage();
-        }, 300); // Skift billede hver 150 ms (ca. 6 fps)
+        }, 300); // hastighed (300 ms = rolig rotation)
     });
 
-    document.getElementById("stopBtn").addEventListener("click", () => {
+    stopBtn.addEventListener("click", () => {
         clearInterval(interval);
-        interval = null;
+        startBtn.disabled = false;
+        stopBtn.disabled = true;
     });
 
-    // --- Smart tilbageknap ---
+    // --- Toggle markeringer ---
+    const toggleBtn = document.getElementById("toggleMarksBtn");
+    toggleBtn.addEventListener("click", () => {
+        markingEnabled = !markingEnabled;
+        toggleBtn.textContent = markingEnabled ? "✏️ Markering: Til" : "✏️ Markering: Fra";
+    });
+
+    // --- Tilbage ---
     document.getElementById("backBtn").addEventListener("click", () => {
         if (window.AndroidInterface) {
             window.AndroidInterface.goBackToDashboard();
@@ -301,6 +308,5 @@
         }
     });
 </script>
-
 </body>
 </html>
