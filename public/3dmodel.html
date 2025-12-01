@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+    <meta charset="UTF-8">
+    <title>360° Bilvisning – Upload</title>
+    <style>
+        body {
+            background: #f2f2f2;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        #upload-container {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #viewer {
+            width: 600px;
+            height: 400px;
+            overflow: hidden;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.3);
+            cursor: grab;
+            background: #fff;
+            display: none; /* skjult indtil billeder er valgt */
+        }
+
+        #viewer img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            user-select: none;
+            pointer-events: none;
+            transform-origin: center center;
+            transition: transform 0.15s ease-out;
+        }
+    </style>
+</head>
+<body>
+
+<div id="upload-container">
+    <h2>Upload billeder til 360° visning</h2>
+    <input type="file" id="imageInput" accept="image/*" multiple>
+    <p>Vælg fx 10–20 billeder taget rundt om bilen.</p>
+</div>
+
+<div id="viewer">
+    <img id="car" />
+</div>
+
+<!-- 🔙 Tilbage-knap -->
+<button id="backBtn" onclick="window.location.href='dashboard.html'">Tilbage til Dashboard</button>
+
+<script>
+    let images = [];
+    let frame = 0;
+    let isDragging = false;
+    let startX = 0;
+    let zoom = 1;
+    const viewer = document.getElementById("viewer");
+    const car = document.getElementById("car");
+
+    // Når brugeren vælger billeder
+    document.getElementById("imageInput").addEventListener("change", (event) => {
+        const files = Array.from(event.target.files);
+
+        if (files.length === 0) return alert("Vælg mindst ét billede.");
+
+        // Sortér billeder alfabetisk (så rækkefølgen passer)
+        files.sort((a, b) => a.name.localeCompare(b.name));
+
+        // Lav lokale URL’er så vi kan vise billederne direkte
+        images = files.map(file => URL.createObjectURL(file));
+
+        frame = 0;
+        car.src = images[frame];
+        viewer.style.display = "block";
+    });
+
+    // Roter når man trækker
+    viewer.addEventListener("mousedown", e => {
+        isDragging = true;
+        startX = e.clientX;
+        viewer.style.cursor = "grabbing";
+    });
+
+    viewer.addEventListener("mouseup", () => {
+        isDragging = false;
+        viewer.style.cursor = "grab";
+    });
+
+    viewer.addEventListener("mousemove", e => {
+        if (!isDragging || images.length === 0) return;
+        const delta = e.clientX - startX;
+        if (Math.abs(delta) > 10) {
+            frame += delta > 0 ? -1 : 1;
+            if (frame < 0) frame = images.length - 1;
+            if (frame >= images.length) frame = 0;
+            car.src = images[frame];
+            startX = e.clientX;
+        }
+    });
+
+    // Zoom med scroll
+    viewer.addEventListener("wheel", e => {
+        e.preventDefault();
+        zoom += e.deltaY < 0 ? 0.1 : -0.1;
+        zoom = Math.min(Math.max(zoom, 1), 3);
+        car.style.transform = `scale(${zoom})`;
+    });
+
+    // Dobbeltklik nulstiller zoom
+    viewer.addEventListener("dblclick", () => {
+        zoom = 1;
+        car.style.transform = "scale(1)";
+    });
+</script>
+
+</body>
+</html>
