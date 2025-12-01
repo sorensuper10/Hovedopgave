@@ -183,6 +183,17 @@
             e.preventDefault();
         }
     });
+
+    // 🧠 Smart tilbageknap — virker både på web og i Android
+    document.getElementById("backBtn").addEventListener("click", () => {
+        if (window.AndroidInterface) {
+            // Kører i appen → kald Android
+            window.AndroidInterface.goBackToDashboard();
+        } else {
+            // Kører i browser → gå til dashboard.html
+            window.location.href = "dashboard.html";
+        }
+    });
 </script>
 
 </body>
