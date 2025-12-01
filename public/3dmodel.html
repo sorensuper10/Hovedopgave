@@ -126,11 +126,9 @@
     const canvas = document.getElementById("canvasOverlay");
     const ctx = canvas.getContext("2d");
 
-    // --- Markeringer ---
+    // --- Markeringer (gemmes per billede/frame) ---
     let markingEnabled = false;
-    let circles = [];
-    let dragIndex = null;
-    let dragStart = null;
+    let marks = {}; // fx marks[0] = [ {x,y,radius,color}, ... ]
     let lastTouchTime = 0;
 
     // --- Hjælpefunktioner ---
@@ -142,7 +140,8 @@
 
     function drawCircles() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        circles.forEach(c => {
+        const frameCircles = marks[frame] || [];
+        frameCircles.forEach(c => {
             ctx.beginPath();
             ctx.arc(c.x, c.y, c.radius, 0, Math.PI * 2);
             ctx.strokeStyle = c.color;
@@ -153,6 +152,7 @@
 
     function updateImage() {
         car.src = images[frame];
+        drawCircles(); // Tegn markeringer for aktuel frame
     }
 
     // --- Upload billeder ---
@@ -248,42 +248,39 @@
         }
     });
 
-    // --- Markeringer på canvas ---
+    // --- Markeringer (touch) ---
     canvas.addEventListener("touchstart", e => {
         if (!markingEnabled) return;
         e.preventDefault();
         const pos = getTouchPos(e);
-        dragIndex = circles.findIndex(c => Math.hypot(c.x - pos.x, c.y - pos.y) < c.radius);
-        dragStart = pos;
+
+        if (!marks[frame]) marks[frame] = [];
+        const frameCircles = marks[frame];
+        let dragIndex = frameCircles.findIndex(c => Math.hypot(c.x - pos.x, c.y - pos.y) < c.radius);
+        const now = Date.now();
 
         if (dragIndex === -1) {
-            circles.push({ x: pos.x, y: pos.y, radius: 30, color: "red" });
-            drawCircles();
-        } else {
-            const now = Date.now();
-            if (now - lastTouchTime < 400) {
-                circles.splice(dragIndex, 1);
-                dragIndex = null;
-                drawCircles();
-            }
-            lastTouchTime = now;
+            frameCircles.push({ x: pos.x, y: pos.y, radius: 30, color: "red" });
+        } else if (now - lastTouchTime < 400) {
+            frameCircles.splice(dragIndex, 1); // dobbelttryk = slet
         }
+        lastTouchTime = now;
+        drawCircles();
     });
 
     canvas.addEventListener("touchmove", e => {
         if (!markingEnabled) return;
         e.preventDefault();
-        if (e.touches.length === 1 && dragIndex !== null) {
-            const pos = getTouchPos(e);
-            circles[dragIndex].x += pos.x - dragStart.x;
-            circles[dragIndex].y += pos.y - dragStart.y;
-            dragStart = pos;
+        const frameCircles = marks[frame];
+        if (!frameCircles) return;
+
+        const pos = getTouchPos(e);
+        const dragIndex = frameCircles.findIndex(c => Math.hypot(c.x - pos.x, c.y - pos.y) < c.radius);
+        if (dragIndex !== -1) {
+            frameCircles[dragIndex].x = pos.x;
+            frameCircles[dragIndex].y = pos.y;
             drawCircles();
         }
-    });
-
-    canvas.addEventListener("touchend", () => {
-        dragIndex = null;
     });
 
     // --- Animation ---
@@ -294,11 +291,10 @@
         if (!images.length) return;
         startBtn.disabled = true;
         stopBtn.disabled = false;
-
         interval = setInterval(() => {
             frame = (frame + 1) % images.length;
             updateImage();
-        }, 300); // hastighed (300 ms = rolig rotation)
+        }, 300); // 300ms = rolig rotation
     });
 
     stopBtn.addEventListener("click", () => {
@@ -307,7 +303,7 @@
         stopBtn.disabled = true;
     });
 
-    // --- Toggle markeringer ---
+    // --- Toggle markering ---
     const toggleBtn = document.getElementById("toggleMarksBtn");
     toggleBtn.addEventListener("click", () => {
         markingEnabled = !markingEnabled;
