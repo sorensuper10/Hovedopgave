@@ -82,6 +82,12 @@
     <canvas id="canvasOverlay"></canvas>
 </div>
 
+<!-- 🎬 Animation kontrol -->
+<div id="controls" style="margin-top: 10px; display: flex; gap: 10px;">
+    <button id="startBtn">▶️ Start animation</button>
+    <button id="stopBtn">⏸️ Stop animation</button>
+</div>
+
 <!-- 🔙 Tilbage -->
 <button id="backBtn">Tilbage til Dashboard</button>
 
@@ -263,6 +269,27 @@
 
     canvas.addEventListener("touchend", () => {
         dragIndex = null;
+    });
+
+    // --- Start/Stop animation ---
+    let interval = null;
+
+    document.getElementById("startBtn").addEventListener("click", () => {
+        if (!images.length) {
+            alert("Vælg billeder først!");
+            return;
+        }
+        if (interval) return; // allerede i gang
+
+        interval = setInterval(() => {
+            frame = (frame + 1) % images.length;
+            updateImage();
+        }, 300); // Skift billede hver 150 ms (ca. 6 fps)
+    });
+
+    document.getElementById("stopBtn").addEventListener("click", () => {
+        clearInterval(interval);
+        interval = null;
     });
 
     // --- Smart tilbageknap ---
