@@ -40,6 +40,21 @@
             transform-origin: center center;
             transition: transform 0.15s ease-out;
         }
+
+        #backBtn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            background: #1976d2;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #backBtn:hover {
+            background: #0d47a1;
+        }
     </style>
 </head>
 <body>
@@ -66,6 +81,10 @@
     const viewer = document.getElementById("viewer");
     const car = document.getElementById("car");
 
+    function updateImage() {
+        car.src = images[frame];
+    }
+
     // Når brugeren vælger billeder
     document.getElementById("imageInput").addEventListener("change", (event) => {
         const files = Array.from(event.target.files);
@@ -79,11 +98,11 @@
         images = files.map(file => URL.createObjectURL(file));
 
         frame = 0;
-        car.src = images[frame];
+        updateImage();
         viewer.style.display = "block";
     });
 
-    // Roter når man trækker
+    // Roter når man trækker (desktop)
     viewer.addEventListener("mousedown", e => {
         isDragging = true;
         startX = e.clientX;
@@ -102,7 +121,7 @@
             frame += delta > 0 ? -1 : 1;
             if (frame < 0) frame = images.length - 1;
             if (frame >= images.length) frame = 0;
-            car.src = images[frame];
+            updateImage();
             startX = e.clientX;
         }
     });
@@ -121,7 +140,7 @@
         car.style.transform = "scale(1)";
     });
 
-    // 📱 Gør rotationen mobilvenlig — konverter touch til mouse events
+    // 📱 Touchsupport (mobil + Android WebView)
     let lastTouchX = 0;
 
     viewer.addEventListener('touchstart', e => {
@@ -135,10 +154,10 @@
             const touchX = e.touches[0].clientX;
             const delta = touchX - lastTouchX;
 
-            if (Math.abs(delta) > 10) {
+            if (Math.abs(delta) > 10 && images.length > 0) {
                 frame += delta > 0 ? -1 : 1;
-                if (frame < 6) frame = total;
-                if (frame > total) frame = 6;
+                if (frame < 0) frame = images.length - 1;
+                if (frame >= images.length) frame = 0;
                 updateImage();
                 lastTouchX = touchX;
             }
