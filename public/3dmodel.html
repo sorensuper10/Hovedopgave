@@ -120,6 +120,30 @@
         zoom = 1;
         car.style.transform = "scale(1)";
     });
+
+    // 📱 Gør rotationen mobilvenlig — konverter touch til mouse events
+    let lastTouchX = 0;
+
+    viewer.addEventListener('touchstart', e => {
+        if (e.touches.length === 1) {
+            lastTouchX = e.touches[0].clientX;
+        }
+    });
+
+    viewer.addEventListener('touchmove', e => {
+        if (e.touches.length === 1) {
+            const touchX = e.touches[0].clientX;
+            const delta = touchX - lastTouchX;
+
+            if (Math.abs(delta) > 10) {
+                frame += delta > 0 ? -1 : 1;
+                if (frame < 6) frame = total;
+                if (frame > total) frame = 6;
+                updateImage();
+                lastTouchX = touchX;
+            }
+        }
+    });
 </script>
 
 </body>
