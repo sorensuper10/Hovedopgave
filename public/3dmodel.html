@@ -38,11 +38,24 @@
         #viewer img {
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: cover; /* standard på web */
             user-select: none;
             pointer-events: none;
             transform-origin: center center;
             transition: transform 0.15s ease-out;
+        }
+
+        /* 📱 Mobil */
+        @media (max-width: 768px) {
+            #viewer {
+                width: 90vw;
+                max-width: 600px;
+                aspect-ratio: 3 / 2;
+            }
+
+            #viewer img {
+                object-fit: contain; /* så hele bilen ses på mobil */
+            }
         }
 
         #canvasOverlay {
@@ -74,6 +87,7 @@
             display: flex;
             gap: 10px;
         }
+
     </style>
 </head>
 <body>
