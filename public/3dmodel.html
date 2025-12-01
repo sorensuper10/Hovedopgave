@@ -174,6 +174,7 @@
 
     // --- Rotation (mus) ---
     viewer.addEventListener("mousedown", e => {
+        if (markingEnabled) return; // 🚫 ingen rotation ved markering
         isDragging = true;
         startX = e.clientX;
         viewer.style.cursor = "grabbing";
@@ -185,6 +186,7 @@
     });
 
     viewer.addEventListener("mousemove", e => {
+        if (markingEnabled) return; // 🚫 ingen rotation ved markering
         if (!isDragging || !images.length) return;
         const delta = e.clientX - startX;
         if (Math.abs(delta) > 10) {
@@ -246,6 +248,49 @@
             initialDistance = distance;
             e.preventDefault();
         }
+    });
+
+    // --- Markeringer med mus på web ---
+    let isMouseDown = false;
+    let selectedCircle = null;
+
+    canvas.addEventListener("mousedown", e => {
+        if (!markingEnabled) return;
+        const rect = canvas.getBoundingClientRect();
+        const pos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        if (!marks[frame]) marks[frame] = [];
+        const frameCircles = marks[frame];
+
+        // Find eksisterende cirkel under musen
+        selectedCircle = frameCircles.find(c => Math.hypot(c.x - pos.x, c.y - pos.y) < c.radius);
+
+        const now = Date.now();
+        if (!selectedCircle) {
+            // Opret ny cirkel
+            frameCircles.push({ x: pos.x, y: pos.y, radius: 30, color: "red" });
+            drawCircles();
+        } else if (now - lastTouchTime < 400) {
+            // Dobbeltklik sletter
+            const i = frameCircles.indexOf(selectedCircle);
+            frameCircles.splice(i, 1);
+            drawCircles();
+        }
+        lastTouchTime = now;
+        isMouseDown = true;
+    });
+
+    canvas.addEventListener("mousemove", e => {
+        if (!markingEnabled || !isMouseDown || !selectedCircle) return;
+        const rect = canvas.getBoundingClientRect();
+        const pos = { x: e.clientX - rect.left, y: e.clientY - rect.top };
+        selectedCircle.x = pos.x;
+        selectedCircle.y = pos.y;
+        drawCircles();
+    });
+
+    canvas.addEventListener("mouseup", () => {
+        isMouseDown = false;
+        selectedCircle = null;
     });
 
     // --- Markeringer (touch) ---
