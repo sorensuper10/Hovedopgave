@@ -487,24 +487,25 @@
         document.getElementById("cameraBtn").style.display = "inline-block";
     }
 
-    // --- Gør klar så Android kan kalde denne funktion når som helst ---
-    window.addCapturedImage = function(uri) {
+    // 📸 Modtag nyt billede fra Android og vis det som om det var valgt manuelt
+    window.addCapturedImage = function (uri) {
         if (!uri) return;
+
+        // 💡 Sørg for at 'images' findes og brug global liste
         if (!window.images) window.images = [];
         window.images.push(uri);
 
-        const viewer = document.getElementById("viewer");
-        const car = document.getElementById("car");
-        const canvas = document.getElementById("canvasOverlay");
-        const ctx = canvas.getContext("2d");
+        // Brug global 'images' i stedet for lokal
+        images = window.images;
 
-        if (window.images.length === 1) {
-            window.frame = 0;
+        // Opdater viewer
+        if (images.length === 1) {
+            frame = 0;
             car.src = uri;
             viewer.style.display = "block";
             canvas.width = viewer.clientWidth;
             canvas.height = viewer.clientHeight;
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            drawCircles();
         }
 
         alert("📷 Nyt billede tilføjet fra kamera!");
