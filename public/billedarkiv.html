@@ -184,6 +184,15 @@
         window.location.href = "dashboard.html";
     });
 
+    // --- Tilbage ---
+    document.getElementById("backBtn").addEventListener("click", () => {
+        if (window.AndroidInterface) {
+            window.AndroidInterface.goBackToDashboard();
+        } else {
+            window.location.href = "dashboard.html";
+        }
+    });
+
     loadImages();
 </script>
 </body>
