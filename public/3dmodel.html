@@ -486,6 +486,17 @@
     if (window.AndroidInterface) {
         document.getElementById("cameraBtn").style.display = "inline-block";
     }
+
+    // 📸 Modtag nyt billede fra Android og vis det som om det var valgt manuelt
+    function addCapturedImage(base64Data) {
+        images.unshift(base64Data); // tilføj først i rækken
+        frame = 0;
+        updateImage();
+        viewer.style.display = "block";
+        canvas.width = viewer.clientWidth;
+        canvas.height = viewer.clientHeight;
+        drawCircles();
+    }
 </script>
 </body>
 </html>
