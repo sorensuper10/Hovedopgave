@@ -8,6 +8,7 @@ const session = require("express-session"); // express-session håndterer login-
 const userRoute = require("./routes/userRoutes"); // Import af userRoutes filen
 const scanRoute = require('./routes/scanRoute');
 const motorApiRoute = require("./routes/motorApiRoute");
+const imageRoute = require("./routes/imageRoutes");
 
 // Initialiser Express-applikationen
 const app = express();
@@ -33,9 +34,9 @@ mongoose.connect(dbConnectionString)
     .catch((err) => console.error("❌ MongoDB connection error:", err)); // Fejlhåndtering
 
 // Middleware gør det muligt for Express at håndtere JSON-data fra API-kald
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
 // Tillader at modtage form-data (fra fx HTML-formularer)
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // Gør 'public'-mappen tilgængelig for statiske filer (HTML, CSS, billeder, scripts)
 app.use(express.static('public'));
@@ -46,6 +47,8 @@ app.use('/api/users', userRoute);
 app.use('/scan', scanRoute);
 
 app.use('/vehicles', motorApiRoute);
+
+app.use("/", imageRoute);
 
 // Start Express-serveren og log besked i konsollen
 app.listen(port, () => console.log(`🚀 Server running on http://localhost:${port}`));

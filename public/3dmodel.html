@@ -107,6 +107,7 @@
     <button id="startAnimBtn">▶️ Start animation</button>
     <button id="stopAnimBtn" disabled>⏸️ Stop animation</button>
     <button id="toggleMarksBtn">✏️ Markering: Fra</button>
+    <button id="saveImageBtn">💾 Gem billede</button>
 </div>
 
 <button id="backBtn">🔙 Tilbage til Dashboard</button>
@@ -361,6 +362,62 @@
             window.AndroidInterface.goBackToDashboard();
         } else {
             window.location.href = "dashboard.html";
+        }
+    });
+
+    // Gem billede
+    document.getElementById("saveImageBtn").addEventListener("click", async () => {
+        if (!images.length) return alert("Vælg mindst ét billede først!");
+
+        try {
+            const currentImage = images[frame];
+            console.log("Gemmer billede:", currentImage);
+
+            // 1️⃣ Hent billedet som blob
+            const blob = await fetch(currentImage).then(r => r.blob());
+
+            // 2️⃣ Gem lokalt (download til brugerens computer)
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "bilbillede_" + Date.now() + ".jpg";
+            a.click(); // tving download
+            URL.revokeObjectURL(url);
+
+            // 3️⃣ Konverter til Base64 for upload til MongoDB
+            const base64 = await new Promise(resolve => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result.split(",")[1]);
+                reader.readAsDataURL(blob);
+            });
+
+            // 4️⃣ Send til backend (MongoDB Atlas)
+            const payload = {
+                filename: "bilbillede_" + Date.now() + ".jpg",
+                data: base64,
+                marks: marks[frame] || [] // 🔥 gem kun markeringerne for den aktuelle frame
+            };
+
+            const BASE_URL = window.location.hostname === "localhost"
+                ? "http://localhost:3000"
+                : "https://hovedopgave.onrender.com";
+
+            const response = await fetch(`${BASE_URL}/uploadImage`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                alert("✅ Billedet er gemt både lokalt og i MongoDB!");
+            } else {
+                alert("⚠️ Kun gemt lokalt (fejl ved upload)");
+            }
+        } catch (err) {
+            console.error("Fejl ved gemning:", err);
+            alert("Der opstod en fejl under gemning.");
         }
     });
 </script>
