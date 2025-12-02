@@ -131,6 +131,7 @@
     <button id="stopAnimBtn" disabled>⏸️ Stop animation</button>
     <button id="toggleMarksBtn">✏️ Markering: Fra</button>
     <button id="saveImageBtn">💾 Gem billede</button>
+    <button id="cameraBtn" style="display:none;">📷 Tag billede</button>
 </div>
 
 <button id="backBtn">🔙 Tilbage til Dashboard</button>
@@ -388,6 +389,14 @@
         }
     });
 
+    document.getElementById("cameraBtn").addEventListener("click", () => {
+        if (window.AndroidInterface && typeof window.AndroidInterface.openCamera === "function") {
+            window.AndroidInterface.openCamera(); // 📸 kald Android-metoden
+        } else {
+            alert("Kamera-funktion er kun tilgængelig i Android-appen.");
+        }
+    });
+
     // --- Gem billede med markeringer ---
     document.getElementById("saveImageBtn").addEventListener("click", async () => {
         if (!images.length) return alert("Vælg mindst ét billede først!");
@@ -472,6 +481,11 @@
             alert("Der opstod en fejl under gemning.");
         }
     });
+
+    // 📱 Kun vis kamera-knappen, hvis vi er i Android WebView
+    if (window.AndroidInterface) {
+        document.getElementById("cameraBtn").style.display = "inline-block";
+    }
 </script>
 </body>
 </html>
