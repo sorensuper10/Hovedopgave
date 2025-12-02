@@ -405,11 +405,21 @@
             // 4️⃣ Konverter det færdige billede til base64 (JPEG)
             const finalDataURL = tempCanvas.toDataURL("image/jpeg", 0.9);
 
-            // 5️⃣ Gem lokalt (download)
-            const a = document.createElement("a");
-            a.href = finalDataURL;
-            a.download = "bilbillede_" + Date.now() + ".jpg";
-            a.click();
+            // 5️⃣ Gem forskelligt afhængig af miljø
+            if (window.AndroidInterface && typeof window.AndroidInterface.saveImageBase64 === "function") {
+                // 📱 Android-app (WebView)
+                window.AndroidInterface.saveImageBase64(finalDataURL);
+                alert("✅ Billedet er gemt lokalt på telefonen!");
+            } else {
+                // 🌐 Webbrowser
+                const a = document.createElement("a");
+                a.href = finalDataURL;
+                a.download = "bilbillede_" + Date.now() + ".jpg";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                alert("💾 Billedet blev downloadet via browseren!");
+            }
 
             // 6️⃣ Upload til backend
             const payload = {
