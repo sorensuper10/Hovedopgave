@@ -56,6 +56,21 @@
             #viewer img {
                 object-fit: contain; /* så hele bilen ses på mobil */
             }
+
+            /* 💡 Knaplayout kun på mobil */
+            #control-buttons {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 8px;
+                width: 90vw;
+            }
+
+            button {
+                flex: 1 1 45%;
+                min-width: 120px;
+                font-size: 14px;
+                padding: 10px;
+            }
         }
 
         #canvasOverlay {
