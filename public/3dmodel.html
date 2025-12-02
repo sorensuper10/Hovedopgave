@@ -488,14 +488,18 @@
     }
 
     // 📸 Modtag nyt billede fra Android og vis det som om det var valgt manuelt
-    function addCapturedImage(base64Data) {
-        images.unshift(base64Data); // tilføj først i rækken
-        frame = 0;
-        updateImage();
-        viewer.style.display = "block";
-        canvas.width = viewer.clientWidth;
-        canvas.height = viewer.clientHeight;
-        drawCircles();
+    function addCapturedImage(uri) {
+        if (!uri) return;
+        images.push(uri);
+        if (images.length === 1) {
+            frame = 0;
+            updateImage();
+            viewer.style.display = "block";
+            canvas.width = viewer.clientWidth;
+            canvas.height = viewer.clientHeight;
+            drawCircles();
+        }
+        alert("📷 Nyt billede tilføjet fra kamera!");
     }
 </script>
 </body>
