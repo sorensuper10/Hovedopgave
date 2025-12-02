@@ -365,37 +365,56 @@
         }
     });
 
-    // Gem billede
+    // --- Gem billede med markeringer ---
     document.getElementById("saveImageBtn").addEventListener("click", async () => {
         if (!images.length) return alert("Vælg mindst ét billede først!");
 
         try {
             const currentImage = images[frame];
-            console.log("Gemmer billede:", currentImage);
+            const frameMarks = marks[frame] || [];
+            console.log("Gemmer billede:", currentImage, "med", frameMarks.length, "markeringer");
 
-            // 1️⃣ Hent billedet som blob
-            const blob = await fetch(currentImage).then(r => r.blob());
+            // 1️⃣ Indlæs billedet i et canvas
+            const img = new Image();
+            img.src = currentImage;
+            await img.decode();
 
-            // 2️⃣ Gem lokalt (download til brugerens computer)
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement("a");
-            a.href = url;
-            a.download = "bilbillede_" + Date.now() + ".jpg";
-            a.click(); // tving download
-            URL.revokeObjectURL(url);
+            const tempCanvas = document.createElement("canvas");
+            const tempCtx = tempCanvas.getContext("2d");
+            tempCanvas.width = img.width;
+            tempCanvas.height = img.height;
 
-            // 3️⃣ Konverter til Base64 for upload til MongoDB
-            const base64 = await new Promise(resolve => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve(reader.result.split(",")[1]);
-                reader.readAsDataURL(blob);
+            // 2️⃣ Tegn originalbilledet
+            tempCtx.drawImage(img, 0, 0, img.width, img.height);
+
+            // 3️⃣ Tegn markeringerne ovenpå
+            frameMarks.forEach(m => {
+                tempCtx.beginPath();
+                tempCtx.arc(
+                    m.x * (img.width / canvas.width),
+                    m.y * (img.height / canvas.height),
+                    m.radius * (img.width / canvas.width),
+                    0,
+                    Math.PI * 2
+                );
+                tempCtx.strokeStyle = m.color || "red";
+                tempCtx.lineWidth = 4;
+                tempCtx.stroke();
             });
 
-            // 4️⃣ Send til backend (MongoDB Atlas)
+            // 4️⃣ Konverter det færdige billede til base64 (JPEG)
+            const finalDataURL = tempCanvas.toDataURL("image/jpeg", 0.9);
+
+            // 5️⃣ Gem lokalt (download)
+            const a = document.createElement("a");
+            a.href = finalDataURL;
+            a.download = "bilbillede_" + Date.now() + ".jpg";
+            a.click();
+
+            // 6️⃣ Upload til backend
             const payload = {
                 filename: "bilbillede_" + Date.now() + ".jpg",
-                data: base64,
-                marks: marks[frame] || [] // 🔥 gem kun markeringerne for den aktuelle frame
+                data: finalDataURL // 👈 færdigt billede med markeringer
             };
 
             const BASE_URL = window.location.hostname === "localhost"
@@ -411,9 +430,9 @@
             const result = await response.json();
 
             if (result.success) {
-                alert("✅ Billedet er gemt både lokalt og i MongoDB!");
+                alert("✅ Billedet med markeringer er gemt både lokalt og i MongoDB!");
             } else {
-                alert("⚠️ Kun gemt lokalt (fejl ved upload)");
+                alert("⚠️ Kun gemt lokalt (fejl ved upload til MongoDB).");
             }
         } catch (err) {
             console.error("Fejl ved gemning:", err);
