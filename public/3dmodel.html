@@ -470,7 +470,6 @@
         document.getElementById("cameraBtn").style.display = "inline-block";
     }
 
-    // 📸 Når man vælger nye filer fra telefonen (tilføj i stedet for at erstatte)
     document.getElementById("imageInput").addEventListener("change", e => {
         const files = Array.from(e.target.files);
         if (!files.length) return;
@@ -482,8 +481,8 @@
         // Tilføj i stedet for at overskrive
         images.push(...newImages);
 
-        // Hvis det er første gang, vi tilføjer
-        if (images.length && viewer.style.display === "none") {
+        // ⚡️Vis det første billede, hvis intet tidligere var vist
+        if (viewer.style.display === "none" && images.length > 0) {
             frame = 0;
             updateImage();
             viewer.style.display = "block";
