@@ -481,14 +481,18 @@
         // Tilføj i stedet for at overskrive
         images.push(...newImages);
 
-        // ⚡️Vis det første billede, hvis intet tidligere var vist
-        if (viewer.style.display === "none" && images.length > 0) {
+        // 📸 Hvis der ikke var billeder før, vis første
+        if (images.length === newImages.length) {
             frame = 0;
-            updateImage();
+            car.src = images[0];
             viewer.style.display = "block";
             canvas.width = viewer.clientWidth;
             canvas.height = viewer.clientHeight;
             drawCircles();
+        } else {
+            // 🔄 Ellers opdater visningen til det sidst tilføjede
+            frame = images.length - 1;
+            updateImage();
         }
 
         alert("📁 " + newImages.length + " nye billede(r) tilføjet!");
