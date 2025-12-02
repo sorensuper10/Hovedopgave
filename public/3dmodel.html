@@ -180,23 +180,6 @@
         drawCircles(); // Tegn markeringer for aktuel frame
     }
 
-    // --- Upload billeder ---
-    document.getElementById("imageInput").addEventListener("change", e => {
-        const files = Array.from(e.target.files);
-        if (!files.length) return alert("Vælg mindst ét billede.");
-
-        files.sort((a, b) => a.name.localeCompare(b.name));
-        images = files.map(f => URL.createObjectURL(f));
-
-        frame = 0;
-        updateImage();
-        viewer.style.display = "block";
-
-        canvas.width = viewer.clientWidth;
-        canvas.height = viewer.clientHeight;
-        drawCircles();
-    });
-
     // --- Rotation (mus) ---
     viewer.addEventListener("mousedown", e => {
         if (markingEnabled) return; // 🚫 ingen rotation ved markering
