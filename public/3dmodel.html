@@ -501,15 +501,16 @@
     // 📸 Modtag nyt billede fra Android (kamera)
     window.addCapturedImage = function (uri) {
         if (!uri) return;
-        if (!window.images) window.images = [];
-        window.images.push(uri);
-        images = window.images;
 
-        // 📸 Sørg for at nye billeder får deres egen tomme markering
+        // 🔹 Brug altid det samme array (uanset rækkefølge)
+        if (!images) images = [];
+        images.push(uri);
+
+        // 🔹 Sørg for, at markeringer findes for det nye billede
         const newFrameIndex = images.length - 1;
-        marks[newFrameIndex] = []; // <-- Tilføjet linje
+        marks[newFrameIndex] = [];
 
-        // Vis det nye billede
+        // 🔹 Vis det nye billede
         const img = new Image();
         img.onload = function () {
             frame = newFrameIndex;
@@ -518,6 +519,7 @@
             canvas.width = viewer.clientWidth;
             canvas.height = viewer.clientHeight;
             drawCircles();
+
             alert("📷 Nyt billede tilføjet fra kamera!");
         };
         img.src = uri;
