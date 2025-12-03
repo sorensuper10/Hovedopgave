@@ -249,6 +249,14 @@
         selectBtn.addEventListener("click", () => fileInput.click());
     }
 
+    // 📱 Skjul kun standard "Vælg fil"-knap i Android-appen
+    if (window.AndroidInterface) {
+        const fileInput = document.getElementById("imageInput");
+        if (fileInput) {
+            fileInput.style.display = "none"; // skjul kun i appen
+        }
+    }
+
     viewer.addEventListener("touchmove", e => {
         if (e.touches.length === 1 && !markingEnabled) {
             const touchX = e.touches[0].clientX;
