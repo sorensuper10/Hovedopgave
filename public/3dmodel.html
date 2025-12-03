@@ -505,10 +505,14 @@
         window.images.push(uri);
         images = window.images;
 
-        // Vent til billedet er helt loadet, før vi opdaterer canvas
+        // 📸 Sørg for at nye billeder får deres egen tomme markering
+        const newFrameIndex = images.length - 1;
+        marks[newFrameIndex] = []; // <-- Tilføjet linje
+
+        // Vis det nye billede
         const img = new Image();
         img.onload = function () {
-            frame = images.length - 1;
+            frame = newFrameIndex;
             car.src = uri;
             viewer.style.display = "block";
             canvas.width = viewer.clientWidth;
