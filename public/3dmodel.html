@@ -57,6 +57,11 @@
                 object-fit: contain; /* så hele bilen ses på mobil */
             }
 
+            #selectFilesBtn {
+                background: #1976d2;
+                color: white;
+            }
+
             /* 💡 Knaplayout kun på mobil */
             #control-buttons {
                 flex-wrap: wrap;
@@ -132,6 +137,7 @@
     <button id="toggleMarksBtn">✏️ Markering: Fra</button>
     <button id="saveImageBtn">💾 Gem billede</button>
     <button id="cameraBtn" style="display:none;">📷 Tag billede</button>
+    <button id="selectFilesBtn">📁 Vælg billeder</button>
 </div>
 
 <button id="backBtn">🔙 Tilbage til Dashboard</button>
@@ -231,6 +237,17 @@
         }
         e.preventDefault();
     });
+
+    // 📱 Kun i Android-appen: aktiver den pæne "Vælg billeder"-knap
+    if (window.AndroidInterface) {
+        document.getElementById("cameraBtn").style.display = "inline-block";
+
+        // Når brugeren trykker på "Vælg billeder", åbn den skjulte file picker
+        const selectBtn = document.getElementById("selectFilesBtn");
+        const fileInput = document.getElementById("imageInput");
+
+        selectBtn.addEventListener("click", () => fileInput.click());
+    }
 
     viewer.addEventListener("touchmove", e => {
         if (e.touches.length === 1 && !markingEnabled) {
