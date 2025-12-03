@@ -5,24 +5,31 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard – Synsdata</title>
 
+    <!-- Tilknytter den fælles CSS-fil for layout og design -->
     <link rel="stylesheet" href="dashboard.css">
 </head>
 
 <body>
 
 <main>
+    <!-- Logo -->
+    <img src="images/logo.png" alt="Synsdata Logo" class="logo">
+
+    <!-- Overskrift -->
     <h1 id="welcome">Velkommen</h1>
 
+    <!-- Navigationsknapper til de forskellige funktioner -->
     <button onclick="window.location.href='scanbillede.html'">Scan billede</button>
     <button onclick="window.location.href='3dmodel.html'">Lav en 3D model</button>
     <button onclick="window.location.href='billedarkiv.html'">🗂️ Billedarkiv</button>
 
+    <!-- Logout-formular der sender POST-request til /api/users/logout -->
     <form action="/api/users/logout" method="POST">
         <button type="submit">Log ud</button>
     </form>
-</main> <!-- ✅ manglende lukning af main -->
+</main>
 
+<!-- Tilknytter JavaScript-filen, som henter brugernavn fra session -->
 <script src="dashboard.js"></script>
-
 </body>
 </html>

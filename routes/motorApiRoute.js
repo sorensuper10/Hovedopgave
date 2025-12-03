@@ -1,12 +1,18 @@
+// Importér Express frameworket
 const express = require("express");
+// Importér Axios til at sende HTTP-forespørgsler til MotorAPI
 const axios = require("axios");
+// Opret en ny router-instans til at håndtere forespørgsler til MotorAPI
 const router = express.Router();
 
 // MotorAPI base URL
 const BASE_URL = "https://v1.motorapi.dk";
 
-// GET /vehicle/:plate → henter data fra MotorAPI
-router.get("/:plate", async (req, res) => {
+ // GET-request til /vehicles/:plate
+ // Modtager et registreringsnummer (nummerplade) som parameter
+ // Henter detaljerede oplysninger om bilen fra MotorAPI
+ // Returnerer samlet JSON med køretøj, miljødata og udstyr
+    router.get("/:plate", async (req, res) => {
     const plate = req.params.plate;
     const token = process.env.MOTORAPI_KEY;
 
@@ -15,22 +21,22 @@ router.get("/:plate", async (req, res) => {
     }
 
     try {
-        // 1️⃣ Fetch basic vehicle details
+        // Hent grundlæggende køretøjsdata (mærke, model, status m.m.)
         const vehicleRes = await axios.get(`${BASE_URL}/vehicles/${plate}`, {
             headers: { "X-AUTH-TOKEN": token }
         });
 
-        // 2️⃣ Fetch environment info
+        // Hent miljøinformation (CO₂-udledning, brændstofforbrug, Euro-norm)
         const envRes = await axios.get(`${BASE_URL}/vehicles/${plate}/environment`, {
             headers: { "X-AUTH-TOKEN": token }
         });
 
-        // 3️⃣ Fetch equipment
+        // Hent udstyrsdetaljer (fx gearkasse, sikkerhed, komfort)
         const equipRes = await axios.get(`${BASE_URL}/vehicles/${plate}/equipment`, {
             headers: { "X-AUTH-TOKEN": token }
         });
 
-        // Send samlet data til frontend
+        // Send alle tre svar samlet tilbage til frontend som ét JSON-objekt
         res.json({
             registration: plate,
             vehicle: vehicleRes.data,
@@ -39,10 +45,14 @@ router.get("/:plate", async (req, res) => {
         });
 
     } catch (err) {
+        // Log detaljeret fejlmeddelelse, hvis MotorAPI returnerer en fejl
         console.error("MotorAPI fejl:", err.response?.data || err.message);
+        // Brug statuskode fra MotorAPI, hvis den findes – ellers 500
         const status = err.response?.status || 500;
+        // Send fejlbesked tilbage til klienten
         res.status(status).json({ error: "MotorAPI request fejlede", details: err.response?.data });
     }
 });
 
+// Eksportér routeren så den kan bruges i server.js
 module.exports = router;

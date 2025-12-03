@@ -21,7 +21,7 @@ exports.postCreateUser = async (req, res) => {
         // Opret bruger i databasen
         await User.create({ username, passwordHash });
 
-        // PRG-pattern: redirect til login efter succesfuld oprettelse
+        // Redirect til login efter succesfuld oprettelse
         return res.redirect("/login.html");
 
     } catch (err) {
@@ -29,7 +29,9 @@ exports.postCreateUser = async (req, res) => {
         if (err && err.code === 11000) {
             return res.status(409).send("Brugernavn er allerede i brug.");
         }
+        // Log detaljeret fejl i serveren til debugging
         console.error("Fejl under oprettelse:", err);
+        // Log detaljeret fejl i serveren til debugging
         return res.status(500).send("Der opstod en fejl. Prøv igen senere.");
     }
 };
@@ -52,46 +54,57 @@ exports.login = async (req, res) => {
         req.session.userId = user._id.toString();
         req.session.username = user.username;
 
-        // Send brugeren til dashboard
+        // Send brugeren til dashboard efter sucessfuld login
         return res.redirect("/dashboard.html");
 
     } catch (err) {
+        // Log detaljeret fejl i serverens konsol til fejlfinding
         console.error("Fejl under login:", err);
+        // Send en generel, sikker fejlbesked til klienten
         return res.status(500).send("Noget gik galt. Prøv igen senere.");
     }
 };
 
 // Log ud
 exports.logout = (req, res) => {
-    // Destroy session og ryd cookie; redirect til forsiden
+    // Destroy session, ryd cookie og redirect til forsiden
     req.session.destroy(() => {
         res.clearCookie("connect.sid");
         return res.redirect("/index.html");
     });
 };
 
+
+// Login via Android app
 exports.appLogin = async (req, res) => {
     try {
         const { username, password } = req.body || {};
         if (!username || !password)
             return res.status(400).json({ success: false, message: "Missing fields" });
 
+        // Find bruger i databasen
         const user = await User.findOne({ username: username.trim() });
         if (!user)
             return res.status(401).json({ success: false, message: "Wrong username or password" });
 
+        // Sammenlign adgangskoder
         const ok = await bcrypt.compare(password, user.passwordHash);
         if (!ok)
             return res.status(401).json({ success: false, message: "Wrong username or password" });
 
+        // Returnér JSON-respons (ingen redirect i app-versionen)
         return res.json({
             success: true,
             username: user.username
         });
-
     } catch (err) {
+        // Log detaljeret fejl i serverens konsol til fejlfinding
         console.error(err);
-        return res.status(500).json({ success: false, message: "Server error" });
+        // Send en generel, sikker fejlbesked til klienten
+        return res.status(500).json({
+            success: false,
+            message: "Serverfejl, prøv igen senere"
+        });
     }
 };
 
@@ -116,7 +129,6 @@ exports.appRegister = async (req, res) => {
                 message: "Brugernavn er allerede i brug"
             });
         }
-
         // Hash adgangskode
         const passwordHash = await bcrypt.hash(password, 10);
 
@@ -129,9 +141,10 @@ exports.appRegister = async (req, res) => {
             username: username,
             message: "Bruger oprettet"
         });
-
     } catch (err) {
+        // Log detaljeret fejl i serverens konsol til fejlfinding
         console.error("Fejl under appRegister:", err);
+        // Send en generel, sikker fejlbesked til klienten
         return res.status(500).json({
             success: false,
             message: "Serverfejl, prøv igen senere"
