@@ -1,6 +1,4 @@
-/* ---------------------------- */
 /*   Grundlæggende sideopsætning */
-/* ---------------------------- */
 
 body {
     font-family: Arial, sans-serif;          /* Enkel og læsbar skrifttype */
@@ -12,10 +10,7 @@ body {
     margin: 0;                               /* Fjerner standard margin */
 }
 
-/* ---------------------------- */
 /*       Indholdsboksen          */
-/* ---------------------------- */
-
 .container {
     text-align: center;                      /* Centrerer alt tekst */
     background: white;                       /* Hvid baggrund for kontrast mod den grå */
@@ -24,10 +19,7 @@ body {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Diskret skygge for dybdeeffekt */
 }
 
-/* ---------------------------- */
 /*       Overskrift og tekst     */
-/* ---------------------------- */
-
 h1 {
     color: #1a73e8;                          /* Blå nuance som gennemgående farve */
     margin-bottom: 10px;                     /* Lidt luft under overskriften */
@@ -38,10 +30,7 @@ p {
     margin-bottom: 25px;                     /* Giver afstand til knapperne */
 }
 
-/* ---------------------------- */
 /*         Knap-styling          */
-/* ---------------------------- */
-
 button {
     background-color: #1a73e8;               /* Primær blå farve */
     color: white;                            /* Hvid tekst for kontrast */

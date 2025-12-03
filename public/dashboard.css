@@ -1,6 +1,4 @@
-/* ------------------------- */
 /*   Grundlæggende layout    */
-/* ------------------------- */
 
 body {
     /* Skrifttype og layout */
@@ -10,17 +8,13 @@ body {
     background-color: #fff;           /* Hvid baggrund */
 }
 
-/* ------------------------- */
 /*        Overskrift          */
-/* ------------------------- */
 
 h1 {
     color: #000;                      /* Mørkegrå farve for god kontrast */
 }
 
-/* ------------------------- */
 /*        Knap-styling        */
-/* ------------------------- */
 
 button {
     margin-top: 20px;                 /* Lidt luft over knappen */
