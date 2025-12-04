@@ -115,16 +115,3 @@ h1 {
     border-radius: 6px;
     cursor: pointer;
 }
-
-/* =========================================================
-   📱 MOBILVENLIGT LOGO (kun på små skærme / app)
-   ========================================================= */
-
-@media (max-width: 768px) {
-    #logo,
-    #imageLogo {
-        width: 150px !important;   /* gør logoet mindre på mobil */
-        height: auto !important;   /* bevarer proportionerne */
-        margin-top: 10px;          /* lidt mindre luft fra toppen */
-    }
-}
