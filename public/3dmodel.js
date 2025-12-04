@@ -440,3 +440,20 @@ window.addCapturedImage = function (uri) {
     };
     img.src = uri;
 };
+
+/* ============================================
+   🎨 Mobiltilpasning af logo (hvis WebView ignorerer CSS)
+   ============================================ */
+
+document.addEventListener("DOMContentLoaded", () => {
+    // Tjek om vi er i app eller på mobil
+    const isMobile = window.innerWidth <= 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile) {
+        const logo = document.getElementById("logo") || document.getElementById("imageLogo");
+        if (logo) {
+            logo.style.width = "150px";
+            logo.style.height = "auto";
+            logo.style.marginTop = "10px";
+        }
+    }
+});
