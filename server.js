@@ -6,8 +6,8 @@ const express = require('express'); // Express bruges til at oprette webserver o
 const mongoose = require('mongoose'); // Mongoose bruges til at forbinde og arbejde med MongoDB
 const session = require("express-session"); // express-session håndterer login-sessioner
 const userRoute = require("./routes/userRoutes"); // Import af userRoutes filen
-const scanRoute = require('./routes/scanRoute'); // Import af scanRoute filen
-const motorApiRoute = require("./routes/motorApiRoute"); // Import af motorApiRoute filen
+const scanRoute = require('./routes/scanRoutes'); // Import af scanRoute filen
+const motorApiRoute = require("./routes/motorApiRoutes"); // Import af motorApiRoute filen
 const imageRoute = require("./routes/imageRoutes"); // Import af imageRoutes filen
 
 // Initialiser Express-applikationen
@@ -44,10 +44,10 @@ app.use(express.static('public'));
 // Alle ruter relateret til brugere håndteres i userRoutes.js under /api/users/
 app.use('/api/users', userRoute);
 
-// Alle forespørgsler til billedscanning (nummerplade / km-tal) håndteres i scanRoute.js under /scan
+// Alle forespørgsler til billedscanning (nummerplade / km-tal) håndteres i scanRoutes.js under /scan
 app.use('/scan', scanRoute);
 
-// Alle kald til køretøjsdata (MotorAPI-integration) håndteres i motorApiRoute.js under /vehicles
+// Alle kald til køretøjsdata (MotorAPI-integration) håndteres i motorApiRoutes.js under /vehicles
 app.use('/vehicles', motorApiRoute);
 
 // Alle billedrelaterede ruter (upload, hentning, galleri osv.) håndteres i imageRoute.js under /

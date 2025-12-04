@@ -85,6 +85,14 @@ button:hover {
 
 @media (max-width: 768px) {
 
+    /* --- Logo mindre i app/mobil --- */
+    #logo,
+    #imageLogo {
+        width: 150px !important;   /* gør logoet mindre */
+        height: auto !important;   /* bevarer proportioner */
+        margin-top: 20px;          /* evt. lidt mindre afstand fra toppen */
+    }
+
     /* --- Viewer-tilpasning til små skærme --- */
     #viewer {
         width: 90vw;                 /* Fylder 90 % af skærmbredden */
