@@ -1,0 +1,88 @@
+/* === Sektion for AI Scan === */
+#ai-scan {
+    text-align: center;
+    margin-top: 40px;                /* Giver den klassiske afstand ned fra toppen */
+}
+
+/* === Forhåndsvisning === */
+#previewContainer {
+    display: none;
+    margin-top: 15px;
+}
+
+#previewBox {
+    border: 1px solid #ccc;
+    padding: 10px;
+    display: inline-block;
+    background: #f7f7f7;
+}
+
+#previewImage {
+    max-width: 300px;
+    border: 1px solid #aaa;
+}
+
+/* === Scan-knap === */
+#scanBtn {
+    display: block;
+    margin: 15px auto 0 auto;
+}
+
+/* === Resultatboks === */
+#result {
+    display: none;
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    background: #f7f7f7;
+}
+
+/* === Køretøjsinfo === */
+#vehicleInfo {
+    display: none;
+    margin-top: 25px;
+    padding: 18px;
+    background: #eef3ff;
+    border: 1px solid #c8d4ff;
+    border-radius: 10px;
+    text-align: left;
+}
+
+#vehicleInfo h4 {
+    margin-top: 0;
+}
+
+.vehicle-line {
+    margin: 4px 0;
+}
+
+/* === Tilbage-knap === */
+#backBtn {
+    margin-top: 30px;
+    padding: 10px 20px;
+    background: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+#backBtn:hover {
+    background: #0d47a1;
+}
+
+/* === Søg info-knap === */
+#searchVehicleBtn {
+    display: none;
+    margin-left: 10px;
+    padding: 4px 10px;
+    background: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#searchVehicleBtn:hover {
+    background: #0d47a1;
+}

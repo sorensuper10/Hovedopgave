@@ -5,65 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Synsdata</title>
 
-    <img src="images/logo.png" alt="Synsdata Logo" class="logo">
-
+    <!-- Tilknyt CSS -->
     <link rel="stylesheet" href="dashboard.css">
-
-    <style>
-        #ai-scan {
-            text-align: center;
-            margin-top: 40px;
-        }
-
-        #previewContainer {
-            display: none;
-            margin-top: 15px;
-        }
-
-        #previewBox {
-            border: 1px solid #ccc;
-            padding: 10px;
-            display: inline-block;
-            background: #f7f7f7;
-        }
-
-        #previewImage {
-            max-width: 300px;
-            border: 1px solid #aaa;
-        }
-
-        #scanBtn {
-            display: block;
-            margin: 15px auto 0 auto;
-        }
-
-        /* ---- Køretøjsinfo styling ---- */
-        #vehicleInfo {
-            display: none;
-            margin-top: 25px;
-            padding: 18px;
-            background: #eef3ff;
-            border: 1px solid #c8d4ff;
-            border-radius: 10px;
-            text-align: left;
-        }
-
-        #vehicleInfo h4 {
-            margin-top: 0;
-        }
-
-        .vehicle-line {
-            margin: 4px 0;
-        }
-    </style>
+    <link rel="stylesheet" href="scan.css">
 </head>
 
 <body>
 
+<!-- Logo -->
+<img src="images/logo.png" alt="Synsdata Logo" class="logo">
+
 <main>
     <!-- AI Scan sektion -->
     <section id="ai-scan">
-        <h2>Scan nummerplade / km-tal</h2>
+        <h2>Scan nummerplade / km-tal / stelnummer</h2>
 
         <input type="file" id="imageInput" accept="image/*">
 
@@ -77,149 +32,32 @@
 
         <p id="loading" style="display:none;">⏳ Scanner billedet…</p>
 
-        <div id="result" style="display:none; margin-top:20px; padding:10px; border:1px solid #ccc; background:#f7f7f7;">
+        <div id="result" style="display:none;">
             <h3>Resultat:</h3>
 
             <p>
                 <strong>Nummerplade:</strong>
                 <span id="plateResult"></span>
 
-                <button id="searchVehicleBtn"
-                        style="display:none; margin-left:10px; padding:4px 10px;">
-                    Søg info
-                </button>
+                <button id="searchVehicleBtn">Søg info</button>
             </p>
 
             <p><strong>KM-tal:</strong> <span id="kmResult"></span></p>
-
             <p><strong>Stelnummer (VIN):</strong> <span id="vinResult"></span></p>
         </div>
 
         <!-- Køretøjsinfo -->
         <div id="vehicleInfo"></div>
 
-        <!-- 🔙 Tilbage til dashboard -->
-        <button id="backBtn" onclick="window.location.href='dashboard.html'">🔙 Tilbage til Dashboard</button>
+        <!-- Tilbage -->
+        <button id="backBtn" onclick="window.location.href='dashboard.html'">
+            🔙 Tilbage til Dashboard
+        </button>
     </section>
 </main>
 
-<script>
-    /* ============================================
-       1) VIS FORHÅNDSVISNING
-       ============================================ */
-    document.getElementById("imageInput").addEventListener("change", function () {
-        const file = this.files[0];
-        if (!file) return;
+<!-- JavaScript -->
+<script src="scan.js"></script>
 
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            document.getElementById("previewImage").src = e.target.result;
-            document.getElementById("previewContainer").style.display = "block";
-        };
-        reader.readAsDataURL(file);
-    });
-
-
-    /* ============================================
-       2) SEND BILLEDE TIL /scan (OCR)
-       ============================================ */
-    document.getElementById("scanBtn").addEventListener("click", async () => {
-        const fileInput = document.getElementById("imageInput");
-        if (!fileInput.files.length) {
-            alert("Vælg et billede først!");
-            return;
-        }
-
-        const formData = new FormData();
-        formData.append("image", fileInput.files[0]);
-
-        document.getElementById("loading").style.display = "block";
-        document.getElementById("result").style.display = "none";
-        document.getElementById("vehicleInfo").style.display = "none";
-
-        const response = await fetch("/scan", {
-            method: "POST",
-            body: formData
-        });
-
-        const data = await response.json();
-
-        document.getElementById("loading").style.display = "none";
-        document.getElementById("result").style.display = "block";
-
-        document.getElementById("plateResult").textContent = data.detected_plate || "Ingen fundet";
-        document.getElementById("kmResult").textContent    = data.detected_km || "Ingen fundet";
-        document.getElementById("vinResult").textContent   = data.detected_vin || "Ingen fundet";
-
-        const searchBtn = document.getElementById("searchVehicleBtn");
-
-        if (data.detected_plate) {
-            searchBtn.style.display = "inline-block";
-            searchBtn.setAttribute("data-plate", data.detected_plate);
-        } else {
-            searchBtn.style.display = "none";
-        }
-    });
-
-
-    /* ============================================
-       3) HENT INFO FRA MOTORAPI
-       ============================================ */
-    document.getElementById("searchVehicleBtn").addEventListener("click", async () => {
-        const plate = document.getElementById("searchVehicleBtn").getAttribute("data-plate");
-
-        const infoBox = document.getElementById("vehicleInfo");
-        infoBox.style.display = "block";
-        infoBox.innerHTML = "⏳ Henter data…";
-
-        try {
-            const response = await fetch(`/vehicles/${plate}`);
-            const data = await response.json();
-
-            const v = data.vehicle;
-            const env = data.environment;
-            const mot = v.mot_info;
-
-            // Beregn årgang
-            const year = (v.model_year && v.model_year > 0)
-                ? v.model_year
-                : (v.first_registration ? v.first_registration.substring(0, 4) : "Ukendt");
-
-            infoBox.innerHTML = `
-                <h4>Køretøjsoplysninger</h4>
-
-                <div class="vehicle-line"><strong>Registreringsnummer:</strong> ${v.registration_number}</div>
-                <div class="vehicle-line"><strong>Status:</strong> ${v.status}</div>
-                <div class="vehicle-line"><strong>Type:</strong> ${v.type}</div>
-                <div class="vehicle-line"><strong>Anvendelse:</strong> ${v.use}</div>
-                <div class="vehicle-line"><strong>Stelnummer (VIN):</strong> ${v.vin}</div>
-                <div class="vehicle-line"><strong>Mærke:</strong> ${v.make}</div>
-                <div class="vehicle-line"><strong>Model:</strong> ${v.model}</div>
-                <div class="vehicle-line"><strong>Variant:</strong> ${v.variant}</div>
-                <div class="vehicle-line"><strong>Årgang:</strong> ${year}</div>
-                <div class="vehicle-line"><strong>Brændstof:</strong> ${v.fuel_type}</div>
-                <div class="vehicle-line"><strong>Motor:</strong> ${v.engine_volume} ccm / ${v.engine_power} hk</div>
-
-                <hr>
-
-                <h4>Seneste syn</h4>
-                <div class="vehicle-line"><strong>Dato:</strong> ${mot?.date || "Ukendt"}</div>
-                <div class="vehicle-line"><strong>Resultat:</strong> ${mot?.result || "Ukendt"}</div>
-                <div class="vehicle-line"><strong>Kilometer ved syn:</strong> ${mot?.mileage || "Ukendt"}</div>
-
-                <hr>
-
-                <h4>Miljø</h4>
-                <div class="vehicle-line"><strong>CO₂:</strong> ${env.co2_emission} g/km</div>
-                <div class="vehicle-line"><strong>Brændstofforbrug:</strong> ${env.fuel_usage || "Ukendt"} km/l</div>
-                <div class="vehicle-line"><strong>Euro-norm:</strong> ${env.euro_norm}</div>
-            `;
-
-        } catch (err) {
-            infoBox.innerHTML = "❌ Fejl: Kunne ikke hente data.";
-        }
-    });
-
-</script>
 </body>
 </html>

@@ -1,0 +1,130 @@
+/* =========================================================
+   🎯 GRUNDLÆGGENDE STYLING (fælles for web og mobil)
+   ========================================================= */
+
+html, body {
+    overscroll-behavior: none;       /* Undgå bounce-effekt på mobil */
+    touch-action: none;              /* Forhindrer utilsigtet scroll */
+    background: white;               /* Neutral baggrund */
+    display: flex;                   /* Centrer hele indholdet */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;                   /* Fylder hele skærmen */
+    margin: 0;
+    font-family: Arial, sans-serif;  /* Simpel og læsbar skrifttype */
+}
+
+/* --- Upload-sektion --- */
+#upload-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* --- Viewer (billedområde) --- */
+#viewer {
+    width: 600px;                    /* Standardstørrelse på desktop */
+    height: 400px;
+    overflow: hidden;                /* Skjul dele af billedet uden for rammen */
+    border-radius: 12px;             /* Bløde hjørner */
+    box-shadow: 0 0 10px rgba(0,0,0,0.3); /* Let skyggeeffekt */
+    cursor: grab;                    /* Viser hånd ved rotation */
+    background: #fff;
+    display: none;                   /* Skjules, indtil et billede er valgt */
+    position: relative;              /* Gør overlay-positionering muligt */
+}
+
+/* --- Selve bilbilledet --- */
+#viewer img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;               /* Fyld området, beskær hvis nødvendigt */
+    user-select: none;               /* Forhindrer markering af billedet */
+    pointer-events: none;            /* Undgå klik-interaktion */
+    transform-origin: center center; /* Zoom-udgangspunkt */
+    transition: transform 0.15s ease-out; /* Glidende zoom */
+}
+
+/* --- Canvas lag til markeringer --- */
+#canvasOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: auto;            /* Gør det klikbart til markering */
+}
+
+/* --- Knapper (fælles stil) --- */
+button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background: #1976d2;             /* Primær blå */
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #0d47a1;             /* Mørkere blå ved hover */
+}
+
+/* --- Knapområde (layout) --- */
+#control-buttons {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;                       /* Luft mellem knapper */
+}
+
+
+/* =========================================================
+   📱 MOBILVENLIGT DESIGN
+   ========================================================= */
+
+@media (max-width: 768px) {
+
+    /* --- Viewer-tilpasning til små skærme --- */
+    #viewer {
+        width: 90vw;                 /* Fylder 90 % af skærmbredden */
+        max-width: 600px;            /* Undgå at blive for stor */
+        aspect-ratio: 3 / 2;         /* Bevar proportioner */
+    }
+
+    /* Hele bilen skal kunne ses på små skærme */
+    #viewer img {
+        object-fit: contain;
+    }
+
+    /* --- Knaplayout --- */
+    #control-buttons {
+        flex-wrap: wrap;             /* Flyt knapper ned på ny linje om nødvendigt */
+        justify-content: center;
+        gap: 8px;
+        width: 90vw;
+    }
+
+    button {
+        flex: 1 1 45%;               /* To knapper per linje */
+        min-width: 120px;
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    /* --- Tilbage-knap nederst --- */
+    #backBtn {
+        width: auto;
+        font-size: 14px;
+        padding: 8px 16px;
+        margin-top: 15px;
+        align-self: center;
+        flex: none;
+    }
+
+    /* --- Fremhæv "Vælg billeder"-knap --- */
+    #selectFilesBtn {
+        background: #1976d2;
+        color: white;
+    }
+}
