@@ -445,15 +445,13 @@ window.addCapturedImage = function (uri) {
    🖼️ Tilpas logo i Android-app
    ============================================ */
 document.addEventListener("DOMContentLoaded", () => {
-    // Vent lidt for at sikre at logoet findes i DOM'en
     setTimeout(() => {
-        const logo = document.getElementById("logo") || document.getElementById("imageLogo");
+        const logo = document.querySelector(".logo"); // ← ændret her
         if (window.AndroidInterface && logo) {
-            // Hvis siden kører i appen → gør logoet mindre
             logo.style.width = "90px";
             logo.style.height = "auto";
             logo.style.marginTop = "5px";
             logo.style.objectFit = "contain";
         }
-    }, 1000); // vent 1 sekund for sikkerhed
+    }, 1000);
 });
