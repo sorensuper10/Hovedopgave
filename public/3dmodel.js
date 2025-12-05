@@ -446,11 +446,12 @@ window.addCapturedImage = function (uri) {
    ============================================ */
 document.addEventListener("DOMContentLoaded", () => {
     setTimeout(() => {
-        const logo = document.getElementById("logo");
+        const logo = document.querySelector(".logo");
         if (window.AndroidInterface && logo) {
             logo.style.width = "120px";
             logo.style.height = "auto";
             logo.style.marginTop = "10px";
+            logo.style.objectFit = "contain";
         }
-    }, 100);
+    }, 1000);
 });
