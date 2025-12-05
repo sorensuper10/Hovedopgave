@@ -90,11 +90,13 @@ loadImages();
    🖼️ Tilpas logo i Android-app
    ============================================ */
 document.addEventListener("DOMContentLoaded", () => {
-    const logo = document.getElementById("logo");
-    if (window.AndroidInterface && logo) {
-        logo.style.width = "120px";
-        logo.style.height = "auto";
-        logo.style.marginTop = "10px";
-        logo.style.objectFit = "contain";
-    }
+    setTimeout(() => {
+        const logo = document.querySelector(".logo");
+        if (window.AndroidInterface && logo) {
+            logo.style.width = "200px";
+            logo.style.height = "auto";
+            logo.style.marginTop = "10px";
+            logo.style.objectFit = "contain";
+        }
+    }, 1000);
 });
