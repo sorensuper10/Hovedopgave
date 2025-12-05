@@ -445,13 +445,11 @@ window.addCapturedImage = function (uri) {
    🖼️ Tilpas logo i Android-app
    ============================================ */
 document.addEventListener("DOMContentLoaded", () => {
-    setTimeout(() => {
-        const logo = document.querySelector(".logo"); // ← ændret her
-        if (window.AndroidInterface && logo) {
-            logo.style.width = "90px";
-            logo.style.height = "auto";
-            logo.style.marginTop = "5px";
-            logo.style.objectFit = "contain";
-        }
-    }, 1000);
+    const logo = document.getElementById("logo");
+    if (window.AndroidInterface && logo) {
+        logo.style.width = "120px";
+        logo.style.height = "auto";
+        logo.style.marginTop = "10px";
+        logo.style.objectFit = "contain";
+    }
 });
