@@ -4,9 +4,9 @@ const mongoose = require("mongoose");
 // Definér et schema for billeder i databasen
 // Hvert billede indeholder filnavn, base64-data og en tidsstempel
 const imageSchema = new mongoose.Schema({
-    filename: String,
-    data: String, // base64 billede (allerede med markeringer)
-    createdAt: {
+    filename: String, // Filnavn på billedet
+    data: String,     // Selve billeddataen gemt som en Base64-kodet streng. Indeholder både originalbilledet og eventuelle markeringer.
+    createdAt: {      // Dato og tid for hvornår billedet blev gemt
         type: Date,
         default: Date.now
     }

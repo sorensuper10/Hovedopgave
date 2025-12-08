@@ -1,29 +1,18 @@
-# --- 1. Base image (Python 3.10 = stabile wheels til Torch) ---
+# --- 1. Base image (Python 3.10 – stabilt og let) ---
 FROM python:3.10-slim
 
-# --- 2. System dependencies for OpenCV + EasyOCR ---
-RUN apt-get update && apt-get install -y \
-    libgl1 \
-    libglib2.0-0 \
-    && rm -rf /var/lib/apt/lists/*
-
-# --- 3. Arbejdsmappe ---
+# --- 2. Arbejdsmappe ---
 WORKDIR /app
 
-# --- 4. Kopiér Python-filer ---
+# --- 3. Kopiér projektfiler ---
 COPY python-worker /app
 
-# --- 5. Installér Python dependencies (men vi gør Torch nemmere) ---
+# --- 4. Installér nødvendige Python-pakker ---
 RUN pip install --upgrade pip
+RUN pip install fastapi uvicorn python-multipart google-cloud-vision protobuf==4.25.1
 
-# Torch CPU version (hurtigere + mindre)
-RUN pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
-
-# EasyOCR + FastAPI + Uvicorn
-RUN pip install easyocr fastapi uvicorn python-multipart opencv-python-headless google-cloud-vision protobuf==4.25.1
-
-# --- 6. Expose port 8000 ---
+# --- 5. Expose port 8000 ---
 EXPOSE 8000
 
-# --- 7. Start python worker ---
+# --- 6. Start FastAPI server ---
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
