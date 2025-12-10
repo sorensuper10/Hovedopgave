@@ -13,7 +13,7 @@ const imageRoute = require("./routes/imageRoutes"); // Import af imageRoutes fil
 // Initialiser Express-applikationen
 const app = express();
 
-// ⚠️ VIGTIGT på Render (proxy + https)
+// VIGTIGT på Render (proxy + https)
 app.set("trust proxy", 1);
 
 // Hent databaseforbindelse og port fra miljøvariabler (.env)

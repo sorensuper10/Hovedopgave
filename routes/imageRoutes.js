@@ -10,6 +10,7 @@ const Image = require("../model/imageModel");
 // Modtager base64-data fra klienten og gemmer det direkte i databasen
 router.post("/uploadImage", async (req, res) => {
     try {
+        // Læser filnavn og data fra request body (formular-data)
         const { filename, data } = req.body;
         if (!data) {
             return res.status(400).json({ success: false, message: "Intet billede modtaget" });

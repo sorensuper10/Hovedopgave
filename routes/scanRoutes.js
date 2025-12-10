@@ -17,8 +17,9 @@ router.post('/', upload.single('image'), async (req, res) => {
     // Tjek om der overhovedet er uploadet et billede
     if (!req.file) return res.status(400).json({ error: "No image uploaded" });
     try {
-        // Opret en formdata med billedet som buffer (nødvendig for at sende til Python-API)
+        // Opretter en container til data, der kan sendes via POST
         const form = new FormData();
+        // Tilføjer billedet som en in-memory buffer, så Python-API’en kan modtage og analysere det uden at gemme filen på serveren
         form.append("image", req.file.buffer, req.file.originalname);
         // Send POST-request til Python OCR-API’en (defineret i .env som PYTHON_WORKER_URL)
         const response = await axios.post(
