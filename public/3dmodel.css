@@ -10,7 +10,7 @@ html, body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;                   /* Fylder hele skærmen */
+    min-height: 100vh;                   /* Fylder hele skærmen */
     margin: 0;
     font-family: Arial, sans-serif;  /* Simpel og læsbar skrifttype */
 }
