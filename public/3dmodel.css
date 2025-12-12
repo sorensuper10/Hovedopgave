@@ -4,7 +4,7 @@
 
 html, body {
     overscroll-behavior: none;       /* Undgå bounce-effekt på mobil */
-    touch-action: none;              /* Forhindrer utilsigtet scroll */
+    touch-action: pan-y;              /* Tillad lodret scrolling */
     background: white;               /* Neutral baggrund */
     display: flex;                   /* Centrer hele indholdet */
     flex-direction: column;
