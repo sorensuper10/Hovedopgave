@@ -1,88 +1,88 @@
 /* === Sektion for AI Scan === */
 #ai-scan {
-    text-align: center;
-    margin-top: 40px;                /* Giver den klassiske afstand ned fra toppen */
+    text-align: center;               /* Centrerer indholdet horisontalt */
+    margin-top: 40px;                 /* Skaber afstand fra tidligere sektion, typisk toppen af siden */
 }
 
-/* === Forhåndsvisning === */
+/* === Forhåndsvisning af uploadet billede === */
 #previewContainer {
-    display: none;
-    margin-top: 15px;
+    display: none;                    /* Skjules indtil et billede er valgt */
+    margin-top: 15px;                 /* Afstand til element ovenfor */
 }
 
 #previewBox {
-    border: 1px solid #ccc;
-    padding: 10px;
-    display: inline-block;
-    background: #f7f7f7;
+    border: 1px solid #ccc;           /* Lys grænse for at afgrænse previewområdet */
+    padding: 10px;                     /* Indvendig afstand for pæn layout */
+    display: inline-block;             /* Gør boksen så bred som dens indhold */
+    background: #f7f7f7;               /* Lys grå baggrund for kontrast */
 }
 
 #previewImage {
-    max-width: 300px;
-    border: 1px solid #aaa;
+    max-width: 300px;                  /* Begrænser billedets størrelse */
+    border: 1px solid #aaa;            /* Let ramme om billedet */
 }
 
 /* === Scan-knap === */
 #scanBtn {
-    display: block;
-    margin: 15px auto 0 auto;
+    display: block;                    /* Blok-element for centreret placering */
+    margin: 15px auto 0 auto;          /* Centrerer knappen horisontalt og giver afstand over */
 }
 
 /* === Resultatboks === */
 #result {
-    display: none;
-    margin-top: 20px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    background: #f7f7f7;
+    display: none;                     /* Skjules indtil scan er udført */
+    margin-top: 20px;                  /* Afstand til scan-knappen */
+    padding: 10px;                     /* Indvendig afstand */
+    border: 1px solid #ccc;            /* Lys grænse for tydelig afgrænsning */
+    background: #f7f7f7;               /* Ensartet baggrund for resultater */
 }
 
-/* === Køretøjsinfo === */
+/* === Køretøjsinformation === */
 #vehicleInfo {
-    display: none;
-    margin-top: 25px;
-    padding: 18px;
-    background: #eef3ff;
-    border: 1px solid #c8d4ff;
-    border-radius: 10px;
-    text-align: left;
+    display: none;                     /* Skjules indtil data er hentet */
+    margin-top: 25px;                  /* Afstand til resultatboks */
+    padding: 18px;                      /* Indvendig afstand for læsbarhed */
+    background: #eef3ff;               /* Lys blå baggrund for visuel adskillelse */
+    border: 1px solid #c8d4ff;         /* Blå kant for bedre fokus */
+    border-radius: 10px;               /* Afrundede hjørner for moderne udseende */
+    text-align: left;                  /* Venstrestiller teksten for bedre læsbarhed */
 }
 
 #vehicleInfo h4 {
-    margin-top: 0;
+    margin-top: 0;                      /* Fjerner standard top-margin fra overskriften */
 }
 
 .vehicle-line {
-    margin: 4px 0;
+    margin: 4px 0;                      /* Lille lodret afstand mellem linjer */
 }
 
 /* === Tilbage-knap === */
 #backBtn {
-    margin-top: 30px;
-    padding: 10px 20px;
-    background: #1976d2;
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
+    margin-top: 30px;                   /* Luft til tidligere element */
+    padding: 10px 20px;                 /* Nok klikbarhed for touch/mus */
+    background: #1976d2;                /* Primær blå farve */
+    color: white;                        /* Tekstfarve for kontrast */
+    border: none;                        /* Ingen kant */
+    border-radius: 8px;                  /* Afrundede hjørner */
+    cursor: pointer;                     /* Pointer indikerer klikbarhed */
 }
 
 #backBtn:hover {
-    background: #0d47a1;
+    background: #0d47a1;                /* Mørkere blå ved hover for feedback */
 }
 
 /* === Søg info-knap === */
 #searchVehicleBtn {
-    display: none;
-    margin-left: 10px;
-    padding: 4px 10px;
-    background: #1976d2;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+    display: none;                       /* Skjules indtil data er tilgængelig */
+    margin-left: 10px;                   /* Afstand til element til venstre */
+    padding: 4px 10px;                   /* Mindre knap til sekundær funktion */
+    background: #1976d2;                 /* Primær blå farve */
+    color: white;                        /* Tekstfarve for kontrast */
+    border: none;                        /* Ingen kant */
+    border-radius: 5px;                   /* Afrundet hjørner */
+    cursor: pointer;                     /* Pointer indikerer klikbarhed */
 }
 
 #searchVehicleBtn:hover {
-    background: #0d47a1;
+    background: #0d47a1;                /* Mørkere blå ved hover for visuel feedback */
 }

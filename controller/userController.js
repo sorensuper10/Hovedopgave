@@ -1,6 +1,9 @@
 const bcrypt = require("bcryptjs"); // Importerer bcrypt til sikker hashing af adgangskoder
 const User = require("../model/userModel"); // Importerer User-modellen
 
+// Gør funktionen tilgængelig for andre filer via require()
+// 'async' gør funktionen asynkron, så serveren kan håndtere andre opgaver,
+// mens den venter på fx databasekald eller API-respons
 // Opret bruger
 exports.postCreateUser = async (req, res) => {
     try {

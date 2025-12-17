@@ -3,81 +3,80 @@
    ========================================================= */
 
 html, body {
-    overscroll-behavior: none;       /* Undgå bounce-effekt på mobil */
-    touch-action: pan-y;              /* Tillad lodret scrolling */
-    background: white;               /* Neutral baggrund */
-    display: flex;                   /* Centrer hele indholdet */
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;               /* Fylder mindst hele skærmen */
-    margin: 0;
-    font-family: Arial, sans-serif;  /* Simpel og læsbar skrifttype */
+    overscroll-behavior: none;       /* Deaktiverer "bounce"-scrolling på touch-enheder */
+    touch-action: pan-y;              /* Tillader kun lodret scrolling, forhindrer horisontal scroll */
+    background: white;               /* Sætter neutral baggrundsfarve */
+    display: flex;                   /* Flexbox layout for centrering af alt indhold */
+    flex-direction: column;          /* Placerer elementer lodret */
+    align-items: center;             /* Centrerer elementer horisontalt */
+    justify-content: center;         /* Centrerer elementer vertikalt */
+    min-height: 100vh;               /* Minimumshøjde = 100 % af viewport */
+    margin: 0;                        /* Fjerner browserens default margin */
+    font-family: Arial, sans-serif;  /* Sætter skrifttype for hele siden */
 }
 
 /* --- Upload-sektion --- */
 #upload-container {
-    text-align: center;
-    margin-bottom: 20px;
+    text-align: center;               /* Centrerer tekst og input-elementer */
+    margin-bottom: 20px;              /* Afstand til efterfølgende indhold */
 }
 
 /* --- Viewer (billedområde) --- */
 #viewer {
-    width: 600px;                    /* Standardstørrelse på desktop */
-    height: 400px;
-    overflow: hidden;                /* Skjul dele af billedet uden for rammen */
-    border-radius: 12px;             /* Bløde hjørner */
-    box-shadow: 0 0 10px rgba(0,0,0,0.3); /* Let skyggeeffekt */
-    cursor: grab;                    /* Viser hånd ved rotation */
-    background: #fff;
-    display: none;                   /* Skjules, indtil et billede er valgt */
-    position: relative;              /* Gør overlay-positionering muligt */
+    width: 600px;                     /* Standard bredde på desktop */
+    height: 400px;                    /* Standard højde på desktop */
+    overflow: hidden;                 /* Skjuler indhold uden for vieweren */
+    border-radius: 12px;              /* Afrundede hjørner for moderne udseende */
+    box-shadow: 0 0 10px rgba(0,0,0,0.3); /* Let skygge for dybde */
+    cursor: grab;                     /* Viser hånd-ikon, signalerer draggable */
+    background: #fff;                 /* Baggrund for billeder uden transparent område */
+    display: none;                    /* Skjuler vieweren indtil billede er uploadet */
+    position: relative;               /* Gør det muligt at placere overlay elementer */
 }
 
 /* --- Selve bilbilledet --- */
 #viewer img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;               /* Fyld området, beskær hvis nødvendigt */
-    user-select: none;               /* Forhindrer markering af billedet */
-    pointer-events: none;            /* Undgå klik-interaktion */
-    transform-origin: center center; /* Zoom-udgangspunkt */
-    transition: transform 0.15s ease-out; /* Glidende zoom */
+    width: 100%;                      /* Fylder hele viewerens bredde */
+    height: 100%;                     /* Fylder hele viewerens højde */
+    object-fit: cover;                /* Beskærer billedet for at fylde området */
+    user-select: none;                /* Forhindrer markering af billedet */
+    pointer-events: none;             /* Ingen direkte klik på billedet */
+    transform-origin: center center;  /* Zoom/rotation udgår fra midten af billedet */
+    transition: transform 0.15s ease-out; /* Smooth zoom eller rotation */
 }
 
 /* --- Canvas lag til markeringer --- */
 #canvasOverlay {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: auto;            /* Gør det klikbart til markering */
+    position: absolute;               /* Placeres oven på billedet */
+    top: 0;                            /* Starter ved toppen af vieweren */
+    left: 0;                           /* Starter ved venstre kant */
+    width: 100%;                       /* Dækker hele viewerens bredde */
+    height: 100%;                      /* Dækker hele viewerens højde */
+    pointer-events: auto;             /* Kan interagere med klik og markeringer */
 }
 
 /* --- Knapper (fælles stil) --- */
 button {
-    margin-top: 10px;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    background: #1976d2;             /* Primær blå */
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
+    margin-top: 10px;                 /* Luft over knapper */
+    padding: 10px 20px;               /* Indvendig afstand for klikbarhed */
+    border: none;                     /* Fjerner standard ramme */
+    border-radius: 8px;               /* Afrundede hjørner */
+    background: #1976d2;              /* Primær blå farve */
+    color: white;                     /* Tekstfarve for kontrast */
+    font-size: 16px;                  /* Læsbar tekststørrelse */
+    cursor: pointer;                  /* Pointer viser klikbarhed */
 }
 
 button:hover {
-    background: #0d47a1;             /* Mørkere blå ved hover */
+    background: #0d47a1;              /* Mørkere blå ved hover for feedback */
 }
 
 /* --- Knapområde (layout) --- */
 #control-buttons {
-    margin-top: 15px;
-    display: flex;
-    gap: 10px;                       /* Luft mellem knapper */
+    margin-top: 15px;                 /* Luft mellem viewer og knapper */
+    display: flex;                    /* Flexbox til horisontal layout */
+    gap: 10px;                        /* Afstand mellem knapper */
 }
-
 
 /* =========================================================
    📱 MOBILVENLIGT DESIGN
@@ -87,44 +86,44 @@ button:hover {
 
     /* --- Viewer-tilpasning til små skærme --- */
     #viewer {
-        width: 90vw;                 /* Fylder 90 % af skærmbredden */
-        max-width: 600px;            /* Undgå at blive for stor */
-        aspect-ratio: 3 / 2;         /* Bevar proportioner */
+        width: 90vw;                  /* Fylder 90 % af viewport-bredden */
+        max-width: 600px;             /* Bevarer maks. desktop-størrelse */
+        aspect-ratio: 3 / 2;          /* Bevarer proportioner på mobil */
     }
 
     /* Hele bilen skal kunne ses på små skærme */
     #viewer img {
-        object-fit: contain;
+        object-fit: contain;          /* Billedet skaleres så hele vises uden beskæring */
     }
 
     /* --- Knaplayout --- */
     #control-buttons {
-        flex-wrap: wrap;             /* Flyt knapper ned på ny linje om nødvendigt */
-        justify-content: center;
-        gap: 8px;
-        width: 90vw;
+        flex-wrap: wrap;              /* Bryder knapper over flere linjer */
+        justify-content: center;      /* Centrerer knapper horisontalt */
+        gap: 8px;                     /* Mindre afstand mellem knapper på mobil */
+        width: 90vw;                  /* Tilpasser bredden til skærm */
     }
 
     button {
-        flex: 1 1 45%;               /* To knapper per linje */
-        min-width: 120px;
-        font-size: 14px;
-        padding: 10px;
+        flex: 1 1 45%;                /* To knapper per linje */
+        min-width: 120px;             /* Minimum bredde for touch-venlig knap */
+        font-size: 14px;              /* Mindre skriftstørrelse på mobil */
+        padding: 10px;                /* Nok plads til touch */
     }
 
     /* --- Tilbage-knap nederst --- */
     #backBtn {
-        width: auto;
+        width: auto;                  /* Automatisk bredde baseret på indhold */
         font-size: 14px;
-        padding: 8px 16px;
-        margin-top: 15px;
-        align-self: center;
-        flex: none;
+        padding: 8px 16px;            /* Mindre padding for mobil */
+        margin-top: 15px;             /* Luft over knap */
+        align-self: center;           /* Centrerer knappen horisontalt */
+        flex: none;                   /* Forhindrer flex-grow */
     }
 
     /* --- Fremhæv "Vælg billeder"-knap --- */
     #selectFilesBtn {
-        background: #1976d2;
-        color: white;
+        background: #1976d2;          /* Primær handling fremhæves */
+        color: white;                 /* Kontrast til tekst */
     }
 }

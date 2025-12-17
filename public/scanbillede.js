@@ -64,7 +64,6 @@ document.getElementById("scanBtn").addEventListener("click", async () => {
     }
 });
 
-
 // Hent info fra MotorAPI
 // Når brugeren klikker "Søg info" efter scanning
 document.getElementById("searchVehicleBtn").addEventListener("click", async () => {
@@ -73,7 +72,7 @@ document.getElementById("searchVehicleBtn").addEventListener("click", async () =
 
     // Find boksen hvor info vises
     const infoBox = document.getElementById("vehicleInfo");
-    infoBox.style.display = "block";
+    infoBox.style.display = "block";       // Gør det synligt
     infoBox.innerHTML = "⏳ Henter data…"; // Midlertidig tekst
 
     try {
@@ -90,10 +89,9 @@ document.getElementById("searchVehicleBtn").addEventListener("click", async () =
             ? v.model_year
             : (v.first_registration ? v.first_registration.substring(0, 4) : "Ukendt");
 
-        // Beregn årgang ud fra model_year eller registrering
+        // Vis køretøjsinformation, seneste syn og miljø
         infoBox.innerHTML = `
                 <h4>Køretøjsoplysninger</h4>
-
                 <div class="vehicle-line"><strong>Registreringsnummer:</strong> ${v.registration_number}</div>
                 <div class="vehicle-line"><strong>Status:</strong> ${v.status}</div>
                 <div class="vehicle-line"><strong>Type:</strong> ${v.type}</div>

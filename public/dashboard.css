@@ -1,5 +1,4 @@
 /*   Grundlæggende layout    */
-
 body {
     /* Skrifttype og layout */
     font-family: Arial, sans-serif;   /* Simpel og læsbar font */
@@ -7,15 +6,11 @@ body {
     margin-top: 80px;                 /* Skubber indholdet ned fra toppen */
     background-color: #fff;           /* Hvid baggrund */
 }
-
 /*        Overskrift          */
-
 h1 {
     color: #000;                      /* Mørkegrå farve for god kontrast */
 }
-
 /*        Knap-styling        */
-
 button {
     margin-top: 20px;                 /* Lidt luft over knappen */
     padding: 10px 20px;               /* Gør knappen større og lettere at trykke på */
