@@ -30,7 +30,7 @@ def extract_plate_google(image_path):
 
     # Opret Vision Image-objekt
     image = vision.Image(content=content)
-    # Kald Google Vision OCR-funktion
+    # Kald Google Vision ocr-funktion
     response = vision_client.text_detection(image=image)
 
     # Stop hvis Vision returnerer fejl
@@ -45,7 +45,7 @@ def extract_plate_google(image_path):
     # Konverter al tekst til store bogstaver for konsistens
     full_text = annotations[0].description.upper()
 
-    # Fjern alle "KM" og kilometertal fra OCR-resultatet (for at undgå forveksling)
+    # Fjern alle "KM" og kilometertal fra ocr-resultatet (for at undgå forveksling)
     full_text = re.sub(r"\b\d+[.,]?\d*\s*KM\b", " ", full_text)
 
     # Definer forskellige danske nummerpladeformater
@@ -79,7 +79,7 @@ def extract_km_google(image_path):
 
     # Opret Vision Image-objekt
     image = vision.Image(content=content)
-    # Kald Google Vision OCR-funktion
+    # Kald Google Vision ocr-funktion
     response = vision_client.text_detection(image=image)
 
     # Stop hvis Vision returnerer fejl
@@ -99,7 +99,7 @@ def extract_km_google(image_path):
     if not all_numbers:
         return None
 
-    # Liste til at gemme alle realistiske kilometertal fundet i OCR-teksten
+    # Liste til at gemme alle realistiske kilometertal fundet i ocr-teksten
     candidates = []
 
     # Gennemgå alle fundne tal og filtrér realistiske km-værdier
@@ -122,7 +122,7 @@ def extract_vin_google(image_path):
 
     # Opret Vision Image-objekt
     image = vision.Image(content=content)
-    # Kald Google Vision OCR-funktion
+    # Kald Google Vision ocr-funktion
     response = vision_client.text_detection(image=image)
 
     # Stop hvis Vision returnerer fejl
@@ -162,7 +162,7 @@ def extract_vin_google(image_path):
 # FastAPI endpoint
 @app.post("/ocr")
 async def ocr_scan(image: UploadFile = File(...)):
-    # Modtag billede → kør OCR → returnér plade, km og stelnummer.
+    # Modtag billede → kør ocr → returnér plade, km og stelnummer.
     try:
         # Gem upload midlertidigt
         content = await image.read()

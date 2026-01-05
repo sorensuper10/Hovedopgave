@@ -1,0 +1,119 @@
+/* === Grundlæggende layout === */
+body {
+    font-family: Arial, sans-serif;   /* Font: Arial for enkel og læsbar tekst, fallback til sans-serif */
+    background: white;                /* Baggrundsfarve: hvid for neutral stil */
+    margin: 0;                        /* Fjern browserens standard margin */
+    padding: 20px;                    /* Tilføj indvendig afstand omkring indhold */
+    text-align: center;               /* Centrer alt indhold horisontalt */
+}
+
+/* Overskrift */
+h1 {
+    color: #1976d2;                   /* Blå farve til overskriften for genkendelig stil */
+    margin-bottom: 20px;              /* Afstand under overskriften, så indholdet ikke sidder for tæt */
+}
+
+/* === Galleri === */
+#imageGallery {
+    display: flex;                    /* Brug flexbox-layout for nem placering af kort */
+    flex-wrap: wrap;                  /* Tillad kortene at bryde til næste række, hvis pladsen ikke er nok */
+    justify-content: center;          /* Centrer alle kort horisontalt i galleriet */
+    gap: 15px;                        /* Luft mellem hvert billede/’kort’ */
+    margin-top: 20px;                 /* Afstand fra toppen af galleriet til tidligere elementer */
+}
+
+/* Kort til hvert billede */
+.imageCard {
+    background: white;                /* Hvid baggrund på kortet */
+    border-radius: 8px;               /* Runde hjørner for blød visuel effekt */
+    box-shadow: 0 0 5px rgba(0,0,0,0.2); /* Let skygge for at give dybde */
+    padding: 10px;                    /* Indvendig afstand mellem indhold og kant */
+    width: 220px;                     /* Fast bredde for ensartet kortstørrelse */
+    cursor: pointer;                  /* Skift cursor til hånd, indikerer klikbarhed */
+    transition: transform 0.2s;       /* Smooth animation ved hover (zoom-effekt) */
+}
+
+/* Zoom-effekt ved hover på kort */
+.imageCard:hover {
+    transform: scale(1.03);           /* Forstør kortet lidt, når musen er over */
+}
+
+/* Billede i kortet */
+.imageCard img {
+    width: 100%;                      /* Billedet fylder hele kortets bredde */
+    border-radius: 6px;               /* Let afrundede hjørner på billedet, passer til kortet */
+}
+
+/* Dato metadata-boks under billede */
+.marksBox {
+    font-size: 13px;                  /* Lidt mindre skrift for metadata */
+    color: #333;                      /* Mørk grå farve for læsbarhed */
+    background: #eef3ff;              /* Lys blå baggrund for at fremhæve info */
+    margin-top: 5px;                  /* Afstand til billedet over */
+    padding: 5px;                      /* Indvendig afstand, så teksten ikke sidder kant-til-kant */
+    border-radius: 4px;               /* Runde hjørner for et blødt look */
+}
+
+/* === Tilbage-knap === */
+#backBtn {
+    margin-top: 30px;                 /* Afstand fra galleriet eller andet indhold ovenfor */
+    padding: 10px 20px;               /* Indvendig afstand: 10px top/bund, 20px venstre/højre */
+    background: #1976d2;              /* Blå baggrund, matcher overskriftens farve */
+    color: white;                     /* Hvid tekst for kontrast */
+    border: none;                     /* Ingen standardkant */
+    border-radius: 8px;               /* Runde hjørner */
+    cursor: pointer;                  /* Hånd ved hover for at indikere klikbar */
+    font-size: 16px;                  /* Læsbar tekststørrelse */
+}
+
+/* Hover-effekt på knap */
+#backBtn:hover {
+    background: #0d47a1;             /* Mørkere blå ved hover for visuel feedback */
+}
+
+/* === Popup overlay === */
+#popup {
+    display: none;                    /* Skjult som standard */
+    position: fixed;                  /* Fast position på skærmen, følger ikke scrolling */
+    top: 0; left: 0;                  /* Starter øverst til venstre */
+    width: 100vw;                     /* Fylder hele skærmbredden */
+    height: 100vh;                    /* Fylder hele skærmhøjden */
+    background: rgba(0,0,0,0.7);      /* Halvgennemsigtig sort baggrund, mørklægger resten */
+    justify-content: center;          /* Centrer popup horisontalt */
+    align-items: center;              /* Centrer popup vertikalt */
+    z-index: 1000;                    /* Ligger over alt andet indhold */
+}
+
+/* Popup-indhold (boks med billede) */
+#popupContent {
+    position: relative;               /* Nødvendigt for at placere luk-knap absolut inde i denne boks */
+    background: #fff;                 /* Hvid baggrund på popup-boksen */
+    padding: 10px;                    /* Indvendig afstand mellem kant og billede */
+    border-radius: 10px;              /* Runde hjørner for flot visuel effekt */
+    max-width: 95vw;                  /* Maks bredde: 95% af viewport */
+    max-height: 95vh;                 /* Maks højde: 95% af viewport */
+    display: flex;                    /* Flexbox for centring af billede indeni */
+    justify-content: center;          /* Centrer billede horisontalt */
+    align-items: center;              /* Centrer billede vertikalt */
+}
+
+/* Stort billede i popup */
+#popupImage {
+    display: block;                   /* Sørger for, at billedet opfører sig som blok-element */
+    max-width: 90vw;                  /* Begrænset bredde for at passe på skærmen */
+    max-height: 90vh;                 /* Begrænset højde for at passe på skærmen */
+    border-radius: 8px;               /* Afrundede hjørner på billedet */
+}
+
+/* Luk-knap i popup */
+#closePopup {
+    position: absolute;               /* Absolut placeret inden for #popupContent */
+    top: 10px;                        /* 10px fra toppen af popup-boksen */
+    right: 10px;                      /* 10px fra højre kant af popup-boksen */
+    background: red;                  /* Rød baggrund for tydelighed */
+    color: white;                     /* Hvid tekst for kontrast */
+    border: none;                     /* Ingen kantlinje */
+    padding: 6px 12px;                /* Indvendig afstand: 6px top/bund, 12px venstre/højre */
+    border-radius: 6px;               /* Afrundede hjørner på knappen */
+    cursor: pointer;                  /* Skift cursor til hånd ved hover */
+}

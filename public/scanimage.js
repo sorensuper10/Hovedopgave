@@ -14,7 +14,7 @@ document.getElementById("imageInput").addEventListener("change", function () {
 });
 
 
-// Send billede til /scan (OCR)
+// Send billede til /scan (ocr)
 // Når brugeren trykker på "Scan billede"-knappen
 document.getElementById("scanBtn").addEventListener("click", async () => {
     const fileInput = document.getElementById("imageInput");
@@ -46,7 +46,7 @@ document.getElementById("scanBtn").addEventListener("click", async () => {
     document.getElementById("loading").style.display = "none";
     document.getElementById("result").style.display = "block";
 
-    // Udfyld felterne med resultater fra OCR
+    // Udfyld felterne med resultater fra ocr
     document.getElementById("plateResult").textContent = data.detected_plate || "Ingen fundet";
     document.getElementById("kmResult").textContent    = data.detected_km || "Ingen fundet";
     document.getElementById("vinResult").textContent   = data.detected_vin || "Ingen fundet";
