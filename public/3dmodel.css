@@ -111,15 +111,16 @@ button:hover {
         padding: 10px;                /* Nok plads til touch */
     }
 
-    /* --- Tilbage-knap nederst --- */
+    /* --- Tilbage-knap nederst ---
     #backBtn {
-        width: auto;                  /* Automatisk bredde baseret på indhold */
-        font-size: 14px;              /* Læsbar tekststørrelse */
-        padding: 8px 16px;            /* Mindre padding for mobil */
-        margin-top: 15px;             /* Luft over knap */
-        align-self: center;           /* Centrerer knappen horisontalt */
-        flex: none;                   /* Forhindrer flex-grow */
+        width: auto;
+        font-size: 14px;
+        padding: 8px 16px;
+        margin-top: 15px;
+        align-self: center;
+        flex: none;
     }
+    */
 
     /* --- Fremhæv "Vælg billeder"-knap --- */
     #selectFilesBtn {
