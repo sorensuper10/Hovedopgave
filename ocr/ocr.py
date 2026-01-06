@@ -6,15 +6,23 @@ import re # Regulære udtryk til tekstsøgning
 from google.cloud import vision # Google Cloud Vision API klient
 import io # Bruges til at læse filer som bytes
 
-# Initialiserer en ny FastAPI-serverinstans
+# Opretter en ny FastAPI-applikation
+# Dette objekt fungerer som backend-API, som både hjemmesiden og Android-appen kommunikerer med
+# API’en modtager billeder og returnerer OCR-resultater (nummerplade, KM, VIN)
 app = FastAPI()
 
-# Google Vision credentials
+# Henter credentials fra miljøvariabelen 'GOOGLE_APPLICATION_CREDENTIALS_JSON'.
+# Dette sikrer, at API-nøgler ikke indlejres direkte i kildekoden.
 creds_json = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")
 
-# Gem credentials midlertidigt i en .json-fil
+# Google Vision API kræver en fysisk JSON-fil til servicekontoen.
+# Derfor oprettes der midlertidigt en fil, som kun bruges under kørsel
+
+# Gem credentials midlertidigt i en JSON-fil
 with tempfile.NamedTemporaryFile(delete=False, suffix=".json") as temp:
+    # Konverterer JSON-teksten til bytes og skriver den til filen
     temp.write(creds_json.encode("utf-8"))
+    # Gemmer stien til den midlertidige fil
     temp_path = temp.name
 
 # Opret Vision API-klient ved hjælp af servicekontoen
@@ -24,25 +32,27 @@ vision_client = vision.ImageAnnotatorClient.from_service_account_file(temp_path)
 def extract_plate_google(image_path):
     #Returnér danske plader: bil, MC, varebil, diplomat, eksport osv.
 
-    # Læs billedet som bytes
+    # Åbner billedfilen i binær læsetilstand
     with io.open(image_path, "rb") as f:
+        # Læser hele billedet som bytes
         content = f.read()
 
-    # Opret Vision Image-objekt
+    # Opretter et Vision Image-objekt baseret på billedets byte-indhold
     image = vision.Image(content=content)
-    # Kald Google Vision ocr-funktion
+    # Sender billedet til Google Vision OCR
     response = vision_client.text_detection(image=image)
 
-    # Stop hvis Vision returnerer fejl
+    # Afbryder funktionen, hvis Vision API returnerer en fejl
     if response.error.message:
         return None
 
-    # Hent tekstresultater (annotations)
+    # Henter OCR-resultaterne fra Vision-responsen
     annotations = response.text_annotations
+    # Returnerer None, hvis ingen tekst blev fundet
     if not annotations:
         return None
 
-    # Konverter al tekst til store bogstaver for konsistens
+    # Konverterer al OCR-tekst til store bogstaver for konsistens
     full_text = annotations[0].description.upper()
 
     # Fjern alle "KM" og kilometertal fra ocr-resultatet (for at undgå forveksling)
@@ -57,45 +67,57 @@ def extract_plate_google(image_path):
     ]
 
     # Gennemgå alle mønstre og returnér første gyldige match
+    # 'patterns' indeholder forskellige danske nummerpladeformater
     for pat in patterns:
+        # Søg efter mønsteret i OCR-teksten
         m = re.search(pat, full_text)
+        # Hvis der findes et match
         if m:
-            letters = m.group(1) # Bogstavdel
-            digits = "".join(m.groups()[1:]) # Saml taldelen
+            # Udtræk bogstavdelen (typisk de første 2 bogstaver på nummerpladen)
+            letters = m.group(1)
+            # Saml alle efterfølgende taldele til én samlet streng
+            # m.groups()[1:] → alle grupper undtagen den første (bogstavdelen)
+            # "".join(...) → sætter dem sammen uden mellemrum, fx '12' + '345' = '12345'
+            digits = "".join(m.groups()[1:])
             # Spring over falske matches som starter med "KM"
             if letters == "KM":
-                continue
-            return letters + digits # Returnér fundet nummerplade
-    # Hvis intet match findes → returnér None
+                continue # ignorer dette match og fortsæt til næste mønster
+            # Returnér nummerpladen som samlet streng (bogstaver + tal)
+            # Fx 'AB12345' eller 'AB1234'
+            return letters + digits
+    # Returnerer None, hvis ingen nummerplade blev fundet
     return None
 
 # Google Vision – KM tal
 def extract_km_google(image_path):
     # Find korrekt kilometertal ved at analysere alle tal og vælge det mest realistiske.
 
-    # Læs billedet som bytes
+    # Åbner billedet i binær læsetilstand
     with io.open(image_path, "rb") as f:
+        # Læser hele billedet som bytes
         content = f.read()
 
-    # Opret Vision Image-objekt
+    # Opretter et Vision Image-objekt baseret på billedets byte-indhold
     image = vision.Image(content=content)
-    # Kald Google Vision ocr-funktion
+    # Sender billedet til Google Vision OCR
     response = vision_client.text_detection(image=image)
 
-    # Stop hvis Vision returnerer fejl
+    # Afbryder funktionen, hvis Vision API returnerer en fejl
     if response.error.message:
         return None
 
-    # Hent tekstresultater (annotations)
+    # Henter OCR-resultaterne fra Vision-responsen
     annotations = response.text_annotations
+    # Returnerer None, hvis ingen tekst blev fundet
     if not annotations:
         return None
 
-    # Saml hele teksten
+    # Samler hele OCR-teksten
     text = annotations[0].description
 
     # Find alle sekvenser af 3–7 cifre
     all_numbers = re.findall(r"\d{3,7}", text)
+    # Returnerer None, hvis ingen tal blev fundet
     if not all_numbers:
         return None
 
@@ -104,9 +126,15 @@ def extract_km_google(image_path):
 
     # Gennemgå alle fundne tal og filtrér realistiske km-værdier
     for n in all_numbers:
+        # Konverter talstrengen til et heltal
         num = int(n)
-        if 5000 < num < 500000:     # Typisk interval for bilers kilometertal
+        # Tjek om tallet ligger inden for et realistisk interval for biler
+        # 5000 < num < 500000 → typisk interval for kilometertal
+        # Mindre tal kan være fejl eller årstal, større tal er usandsynligt
+        if 5000 < num < 500000:
+            # Hvis tallet er realistisk, tilføj det til listen over kandidater
             candidates.append(num)
+            # Hvis ingen realistiske kilometertal blev fundet, returnér None
     if not candidates:
         return None
     # Returnér det største tal (typisk det rigtige kilometertal)
@@ -116,28 +144,30 @@ def extract_km_google(image_path):
 def extract_vin_google(image_path):
     # Find stelnummer (VIN) og undgå alle instrumentbræt-tal.
 
-    # Læs billedet som bytes
+    # Åbner billedet i binær læsetilstand
     with io.open(image_path, "rb") as f:
+        # Læser hele billedet som bytes
         content = f.read()
 
-    # Opret Vision Image-objekt
+    # Opretter et Vision Image-objekt baseret på billedets byte-indhold
     image = vision.Image(content=content)
-    # Kald Google Vision ocr-funktion
+    # Sender billedet til Google Vision OCR
     response = vision_client.text_detection(image=image)
 
-    # Stop hvis Vision returnerer fejl
+    # Afbryder funktionen, hvis Vision API returnerer en fejl
     if response.error.message:
         return None
 
-    # Hent tekstresultater (annotations)
+    # Henter OCR-resultaterne fra Vision-responsen
     annotations = response.text_annotations
+    # Returnerer None, hvis ingen tekst blev fundet
     if not annotations:
         return None
 
-    # Saml hele teksten
+    # Samler al tekst og konverterer til store bogstaver
     text = annotations[0].description.upper()
 
-    # Fjern whitespace
+    # Fjerner mellemrum og linjeskift
     text = text.replace(" ", "").replace("\n", "")
 
     # Fjern støj (km-tal, hastighed, “TRIP”, “STOP” osv.)
@@ -150,22 +180,27 @@ def extract_vin_google(image_path):
 
     # VIN-format: præcis 17 tegn (A–Z, 0–9, men uden I/O/Q)
     vin_pattern = r"\b[A-HJ-NPR-Z0-9]{17}\b"
+    # Søger efter første forekomst af mønsteret i OCR-teksten
     match = re.search(vin_pattern, text)
+    # Hvis ingen match findes → returnér None (ingen VIN fundet)
     if not match:
         return None
+    # Udtrækker det matchede VIN fra match-objektet
     vin = match.group(0)
-    # Ekstra sikkerhed: stelnummer må ikke starte eller slutte med tal fra instrumentbrættet
+    # Ekstra validering: udeluk rene talstrenge med 5 eller flere cifre
     if re.match(r"^\d{5,}$", vin):
         return None
+    # Returnér det endelige VIN-nummer
     return vin
 
 # FastAPI endpoint
 @app.post("/ocr")
 async def ocr_scan(image: UploadFile = File(...)):
-    # Modtag billede → kør ocr → returnér plade, km og stelnummer.
+    # Modtag billede → kør ocr → returnér nummerplade, km-tal og stelnummer.
     try:
-        # Gem upload midlertidigt
+        # Læser det uploadede billede
         content = await image.read()
+        # Gemmer billedet midlertidigt på serveren
         with open("temp.jpg", "wb") as f:
             f.write(content)
 
