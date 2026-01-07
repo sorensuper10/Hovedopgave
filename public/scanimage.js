@@ -1,18 +1,18 @@
 // Når brugeren vælger et billede, vises en forhåndsvisning
 document.getElementById("imageInput").addEventListener("change", function () {
     const file = this.files[0]; // Hent første valgte fil
-    if (!file) return; // Stop hvis ingen fil valgt
+    if (!file) return; // Stopper funktionen hvis ingen fil er valgt
 
     const reader = new FileReader(); // Opret FileReader til at læse billedet
+    // Når filen er færdig læst
     reader.onload = (e) => {
-        // Sæt billedets data som preview i <img>
+        // Sætter billedets Base64-data som kilde for preview-billedet
         document.getElementById("previewImage").src = e.target.result;
-        // Vis preview-container
+        // Gør preview-containeren synlig
         document.getElementById("previewContainer").style.display = "block";
     };
     reader.readAsDataURL(file); // Læs billedet som Base64-data
 });
-
 
 // Send billede til /scan (ocr)
 // Når brugeren trykker på "Scan billede"-knappen
@@ -25,22 +25,25 @@ document.getElementById("scanBtn").addEventListener("click", async () => {
         return;
     }
 
-    // Opret form-data til upload (som multipart/form-data)
+    // Opretter FormData til upload af billedet
     const formData = new FormData();
-    formData.append("image", fileInput.files[0]);
+    formData.append("image", fileInput.files[0]); // Tilføjer billedfilen
 
-    // Skjul resultat og vis "indlæser"
+    // Viser loading-tekst og skjuler tidligere resultater
     document.getElementById("loading").style.display = "block";
     document.getElementById("result").style.display = "none";
     document.getElementById("vehicleInfo").style.display = "none";
 
-    // Send billedet til backend (/scan)
+    // Sender en asynkron POST-request til backend-endpointet /scan
+    // Requesten indeholder billedet som multipart/form-data,
+    // så backend (FastAPI) kan modtage og behandle billedfilen
     const response = await fetch("/scan", {
-        method: "POST",
-        body: formData
+        method: "POST", // Angiver at der sendes data til serveren
+        body: formData // Indeholder billedet, som skal OCR-scannes
     });
 
-    const data = await response.json(); // Parse JSON-svar fra server
+    // Parse JSON-svar fra server
+    const data = await response.json();
 
     // Skjul loading-tekst og vis resultater
     document.getElementById("loading").style.display = "none";
@@ -54,12 +57,12 @@ document.getElementById("scanBtn").addEventListener("click", async () => {
     // Hent knappen til at søge køretøjsinfo
     const searchBtn = document.getElementById("searchVehicleBtn");
 
-    // Hvis nummerplade fundet → vis knap og gem nummerpladen som attribut
+    // Hvis der blev fundet en nummerplade
     if (data.detected_plate) {
-        searchBtn.style.display = "inline-block";
-        searchBtn.setAttribute("data-plate", data.detected_plate);
+        searchBtn.style.display = "inline-block"; // Viser knappen
+        searchBtn.setAttribute("data-plate", data.detected_plate); // Gemmer nummerpladen
     } else {
-        // Skjul hvis ingen nummerplade
+        // Skjuler knappen hvis ingen nummerplade blev fundet
         searchBtn.style.display = "none";
     }
 });
@@ -78,6 +81,8 @@ document.getElementById("searchVehicleBtn").addEventListener("click", async () =
     try {
         // Hent data fra backend-endpoint (/vehicles/:plate)
         const response = await fetch(`/vehicles/${plate}`);
+
+        // Parse JSON-svar fra server
         const data = await response.json();
 
         const v = data.vehicle; // Køretøjsdata

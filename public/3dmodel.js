@@ -28,9 +28,9 @@ let lastTouchTime = 0;        // Tidspunkt for sidste tryk, bruges til dobbeltkl
 
 // Beregn touch-position relativt til canvas
 function getTouchPos(e) {
-    const rect = canvas.getBoundingClientRect();           // Hent canvas’ position på siden
-    const t = e.touches[0];                                // Første touch-point
-    return { x: t.clientX - rect.left, y: t.clientY - rect.top }; // Returner x,y relativt til canvas
+    const rect = canvas.getBoundingClientRect();          // Hent canvas’ position på siden
+    const t = e.touches[0];                                        // Første touch-point
+    return { x: t.clientX - rect.left, y: t.clientY - rect.top };  // Returner x,y relativt til canvas
 }
 
 // Tegn alle cirkler for den aktuelle frame
@@ -75,7 +75,7 @@ viewer.addEventListener("mousemove", e => {
     if (markingEnabled) return;   // Stop hvis markering er aktiv
     if (!isDragging || !images.length) return; // Stop hvis ikke trækker eller ingen billeder
 
-    const delta = e.clientX - startX;            // Beregn forskel fra startposition
+    const delta = e.clientX - startX;     // Beregn forskel fra startposition
     if (Math.abs(delta) > 10) {                  // Kun hvis bevægelsen er stor nok
         frame += delta > 0 ? -1 : 1;            // Skift frame afhængigt af retning
         if (frame < 0) frame = images.length - 1;   // Wrap-around hvis < 0
@@ -112,7 +112,7 @@ let lastTouchX = 0;                               // Gem sidst kendt touch X
 // Start touch
 viewer.addEventListener("touchstart", e => {
     if (e.touches.length === 1) lastTouchX = e.touches[0].clientX; // En finger = rotation
-    if (e.touches.length === 2) {
+    if (e.touches.length === 2) {                                  // To fingre = pinch-zoom
         const dx = e.touches[0].clientX - e.touches[1].clientX;       // X-difference mellem to fingre
         const dy = e.touches[0].clientY - e.touches[1].clientY;       // Y-difference
         initialDistance = Math.hypot(dx, dy);                          // Beregn startafstand
@@ -156,7 +156,7 @@ let isMouseDown = false;                     // Om musen trykkes ned
 let selectedCircle = null;                   // Den valgte cirkel til flytning
 
 // --- Web (mus) ---
-// Klik på canvas
+// Opret cirkel med klik på canvas med musen
 canvas.addEventListener("mousedown", e => {
     if (!markingEnabled) return;             // Stop hvis markering er slået fra
     const rect = canvas.getBoundingClientRect();               // Hent canvas position
@@ -178,7 +178,7 @@ canvas.addEventListener("mousedown", e => {
     isMouseDown = true;                                       // Musen er trykket ned
 });
 
-// Træk mus
+// Træk en eksisterende cirkel på canvas med mus
 canvas.addEventListener("mousemove", e => {
     if (!markingEnabled || !isMouseDown || !selectedCircle) return; // Stop hvis ikke aktivt
     const rect = canvas.getBoundingClientRect();               // Hent canvas position
@@ -195,7 +195,7 @@ canvas.addEventListener("mouseup", () => {
 });
 
 // --- Touch (mobil/tablet) ---
-// Touch start
+// Opret cirkel med klik på canvas med touch
 canvas.addEventListener("touchstart", e => {
     if (!markingEnabled) return;                                 // Stop hvis ikke aktiv
     e.preventDefault();                                          // Stop standard handling
@@ -215,7 +215,7 @@ canvas.addEventListener("touchstart", e => {
     drawCircles();                                               // Tegn cirkler
 });
 
-// Touch move
+// Træk en eksisterende cirkel på canvas med touch
 canvas.addEventListener("touchmove", e => {
     if (!markingEnabled) return;                                 // Stop hvis ikke aktiv
     e.preventDefault();                                          // Stop standard scroll
@@ -242,14 +242,14 @@ startBtn.addEventListener("click", () => {                     // Start animatio
     if (!images.length) return;                                  // Stop hvis ingen billeder
     startBtn.disabled = true;                                     // Deaktiver start
     stopBtn.disabled = false;                                     // Aktivér stop
-    interval = setInterval(() => {                                // Start interval
+    interval = setInterval(() => {                   // Start interval
         frame = (frame + 1) % images.length;                     // Skift frame
         updateImage();                                            // Opdater billede
-    }, 300);                                                     // Skift hvert 0.3 sekund
+    }, 1000);                                               // Skift hvert 1 sekund
 });
 
-stopBtn.addEventListener("click", () => {                      // Stop animation
-    clearInterval(interval);                                     // Stop interval
+stopBtn.addEventListener("click", () => {       // Stop animation
+    clearInterval(interval);                                      // Stop interval
     startBtn.disabled = false;                                    // Aktivér start igen
     stopBtn.disabled = true;                                      // Deaktiver stop
 });
@@ -280,7 +280,7 @@ document.getElementById("backBtn").addEventListener("click", () => { // Klik på
    📷 Kamera + filhåndtering
    ============================================ */
 
-// Åbn Android-kameraet (kun WebView)
+// Åbn Android-kameraet (kun i app)
 document.getElementById("cameraBtn").addEventListener("click", () => {
     if (window.AndroidInterface?.openCamera) {                    // Hvis funktionen findes
         window.AndroidInterface.openCamera();                     // Åbn kamera
@@ -373,7 +373,7 @@ document.getElementById("saveImageBtn").addEventListener("click", async () => {
             window.AndroidInterface.saveImageBase64(finalDataURL);    // Gem billede på telefonen
             alert("✅ Billedet er gemt lokalt på telefonen!");
         } else {
-            const a = document.createElement("a");                    // Opret link
+            const a = document.createElement("a"); // Opret link
             a.href = finalDataURL;                                     // Sæt href til billedets data
             a.download = "bilbillede_" + Date.now() + ".jpg";         // Sæt filnavn
             document.body.appendChild(a);                              // Tilføj til DOM
@@ -383,8 +383,8 @@ document.getElementById("saveImageBtn").addEventListener("click", async () => {
         }
 
         // 6️⃣ Upload færdigt billede til backend
-        const payload = {                                             // Lav payload objekt
-            filename: "bilbillede_" + Date.now() + ".jpg",           // Filnavn
+        const payload = {                      // Lav payload objekt
+            filename: "bilbillede_" + Date.now() + ".jpg",            // Filnavn
             data: finalDataURL                                        // Base64 data
         };
 
@@ -424,7 +424,7 @@ window.addCapturedImage = function (uri) {     // Funktion kaldt fra Android med
     marks[newFrameIndex] = [];                  // Initialiser tom markering for ny frame
 
     const img = new Image();                    // Opret nyt Image objekt
-    img.onload = function () {                  // Når billedet er indlæst
+    img.onload = function () {              // Når billedet er indlæst
         frame = newFrameIndex;                  // Skift til ny frame
         car.src = uri;                           // Opdater <img> kilden
         viewer.style.display = "block";         // Vis viewer
