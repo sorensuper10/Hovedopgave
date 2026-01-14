@@ -60,9 +60,9 @@ def extract_plate_google(image_path):
 
     # Definer forskellige danske nummerpladeformater
     patterns = [
-        r"\b([A-Z]{2})\s*([0-9]{2})\s*([0-9]{3})\b",  # Standard bil (AB 12 345)
+        r"\b([A-Z]{2})\s*([0-9]{2})\s*([0-9]{3})\b",  # Standard bil / MC (AB 12 345)
         r"\b([A-Z]{2})\s*([0-9]{2})\s*([0-9]{2})\b",  # Gul varebil (AB 12 34)
-        r"\b([A-Z]{2})\s*([0-9]{3})\b",               # MC (AB 123)
+        r"\b([A-Z]{2})\s*([0-9]{3})\b",               # Gammel MC (AB 123)
         r"\b([A-Z]{2})\s*([0-9]{4})\b",               # Eksport (AB 1234)
     ]
 
