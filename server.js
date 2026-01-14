@@ -23,7 +23,7 @@ const port = process.env.PORT || 3000; // Standardport = 3000, hvis ingen port e
 
 // express-session bruges til at gemme login-informationer midlertidigt i browseren
 app.use(session({
-    secret: "hemmeligNøgle", // Nøgle til at signere session-cookies (bør normalt ligge i .env)
+    secret: "hemmeligNøgle", // Nøgle til at signere session-cookies
     resave: false,            // Gem ikke sessioner igen, hvis de ikke er ændret
     saveUninitialized: false, // Undgå at gemme tomme sessioner (bedre ydeevne og sikkerhed)
     cookie: { secure: process.env.NODE_ENV === "production" } // Brug sikre cookies i production
