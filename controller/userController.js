@@ -35,7 +35,7 @@ exports.postCreateUser = async (req, res) => {
         }
         // Log detaljeret fejl i serveren til debugging
         console.error("Fejl under oprettelse:", err);
-        // Log detaljeret fejl i serveren til debugging
+        // Returnér generisk fejlbesked til klienten
         return res.status(500).send("Der opstod en fejl. Prøv igen senere.");
     }
 };
