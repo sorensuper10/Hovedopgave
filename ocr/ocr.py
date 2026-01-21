@@ -79,9 +79,6 @@ def extract_plate_google(image_path):
             # m.groups()[1:] → alle grupper undtagen den første (bogstavdelen)
             # "".join(...) → sætter dem sammen uden mellemrum, fx '12' + '345' = '12345'
             digits = "".join(m.groups()[1:])
-            # Spring over falske matches som starter med "KM"
-            #if letters == "KM":
-                #continue # ignorer dette match og fortsæt til næste mønster
             # Returnér nummerpladen som samlet streng (bogstaver + tal)
             # Fx 'AB12345' eller 'AB1234'
             return letters + digits
