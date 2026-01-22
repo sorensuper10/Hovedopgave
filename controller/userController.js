@@ -15,10 +15,6 @@ exports.postCreateUser = async (req, res) => {
         // Fjerner mellemrum før/efter brugernavn
         username = username.trim();
 
-        // Tjek om brugernavn allerede findes i databasen
-        const exists = await User.findOne({ username });
-        if (exists) return res.status(409).send("Brugernavn er allerede i brug.");
-
         // Hasher adgangskoden med bcrypt (10 saltrunder)
         const passwordHash = await bcrypt.hash(password, 10);
 
